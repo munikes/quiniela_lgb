@@ -1,0 +1,22 @@
+{% if user.is_authenticated %}
+<form method="post" action=".">{% csrf_token %}
+  <p>Usuario: {{ apuesta.usuario }}</p>
+  <p>Jornada: {{ apuesta.jornada.numero }}
+  {% for partido in partidos  %}
+    <p>{{ partido.casilla}} {{ partido.local }} - {{ partido.visitante }}
+    {% if partido.casilla != 15 %}
+    1<input type="checkbox" name="signo-{{ partido.casilla }}" id="1_{{ partido.casilla }}" value="1">
+    X<input type="checkbox" name="signo-{{ partido.casilla }}" id="X_{{ partido.casilla }}" value="X">
+    2<input type="checkbox" name="signo-{{ partido.casilla }}" id="2_{{ partido.casilla }}" value="2"></p>
+    {% else %}
+    1<input type="radio" name="signo-{{ partido.casilla }}" id="1_{{ partido.casilla }}" value="1">
+    X<input type="radio" name="signo-{{ partido.casilla }}" id="X_{{ partido.casilla }}" value="X">
+    2<input type="radio" name="signo-{{ partido.casilla }}" id="2_{{ partido.casilla }}" value="2"></p>
+    {% endif %}
+  {% endfor %}
+  <input type="submit" value="Submit" />
+</form>
+<a href="/logout/">Logout</a>
+{% else %}
+<a href="/">Login</a>
+{% endif %}

@@ -1,0 +1,12 @@
+{% if user.is_authenticated %}
+<h1>Apuesta</h1>
+  {% if perms.staff %}
+  <a href="{% url "crear_jornada" %}">Nueva Jornada</a>
+  <a href="{% url "crear_apuesta" %}">Nueva Apuesta</a>
+  {% else %}
+  <a href="{% url "crear_apuesta" %}">Nueva Apuesta</a>
+  {% endif %}
+  <a href="/logout/">Logout</a>
+{% else %}
+<a href="/">Login</a>
+{% endif %}

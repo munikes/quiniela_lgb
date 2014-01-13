@@ -1,0 +1,11 @@
+{% if user.is_authenticated %}
+<form method="post">{% csrf_token %}
+  {% for form in formset %}
+  <p>Hola{{ form }}</p>
+  {% endfor %}
+  <input type="submit" value="Submit" />
+</form>
+<a href="/logout/">logout</a>
+{% else %}
+<a href="/">login</a>
+{% endif %}
