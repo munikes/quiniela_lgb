@@ -57,11 +57,13 @@ EQUIPOS = (
         ('Deportivo', 'Deportivo'),
         ('Eibar', 'Eibar'),
         ('Girona', 'Girona'),
+        ('Hercules', 'Hércules'),
         ('Jaen', 'Jaen'),
         ('Las Palmas', 'Las Palmas'),
         ('Lugo', 'Lugo'),
         ('Mallorca', 'Mallorca'),
         ('Murcia', 'Murcia'),
+        ('Numancia', 'Numancia'),
         ('Ponferradina', 'Ponferradina'),
         ('Recreativo', 'Recreativo'),
         ('Sabadell', 'Sabadell'),
@@ -77,18 +79,21 @@ class Jornada (models.Model):
 class Apuesta (models.Model):
     jornada = models.ForeignKey(Jornada)
     usuario = models.ForeignKey(User)
-    numero = models.PositiveSmallIntegerField(primary_key=True,
-            help_text='Número de apuesta.', verbose_name = 'Número')
+    numero = models.PositiveSmallIntegerField(help_text='Número de apuesta.', 
+            verbose_name = 'Número')
+
+    class Meta:
+        unique_together = (('jornada', 'usuario', 'numero'),)
 
 
 class Partido (models.Model):
     jornada = models.ForeignKey(Jornada)
     signo = models.CharField(max_length=1, choices=OPCIONES,
             verbose_name = 'Resultado')
-    local = models.CharField(max_length=20, verbose_name='Local', unique=True,
+    local = models.CharField(max_length=20, verbose_name='Local',
             choices=EQUIPOS)
     visitante = models.CharField(max_length=20, verbose_name='Visitante',
-            unique=True, choices=EQUIPOS)
+            choices=EQUIPOS)
     casilla = models.PositiveSmallIntegerField(verbose_name='Casilla', validators=[
             MaxValueValidator(15),
             MinValueValidator(1)
@@ -114,7 +119,10 @@ class Resultado (models.Model):
     casilla = models.PositiveSmallIntegerField(verbose_name='Casilla', validators=[
             MaxValueValidator(15),
             MinValueValidator(1)
-        ], help_text='La casilla del partido.', primary_key=True)
+        ], help_text='La casilla del partido.')
+
+    class Meta:
+        unique_together = (('apuesta', 'casilla'),)
 
 
 class Premio (models.Model):

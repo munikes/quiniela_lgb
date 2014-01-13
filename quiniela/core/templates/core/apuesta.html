@@ -1,7 +1,7 @@
 {% if user.is_authenticated %}
 <form method="post" action=".">{% csrf_token %}
-  <p>Usuario: {{ apuesta.usuario }}</p>
-  <p>Jornada: {{ apuesta.jornada.numero }}
+  <p>Usuario: {{ user.username }}</p>
+  <p>Jornada: {{ jornada.numero }}
   {% for partido in partidos  %}
     <p>{{ partido.casilla}} {{ partido.local }} - {{ partido.visitante }}
     {% if partido.casilla != 15 %}

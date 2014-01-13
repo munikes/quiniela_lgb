@@ -51,12 +51,6 @@ def crear_jornada(request, template_name = 'core/partidos.html'):
         partidos_formset = PartidosFormSet(request.POST)
         if jornada_form.is_valid() and partidos_formset.is_valid():
             jornada = jornada_form.save()
-            # Meto todos los usuarios en apuesta con esa jornada
-            apuesta = Apuesta()
-            for user in User.objects.all():
-                apuesta.usuario = user
-                apuesta.jornada = jornada
-                apuesta.save()
             for form in partidos_formset:
                 i += 1
                 partido = form.save(commit=False)
@@ -71,29 +65,32 @@ def crear_jornada(request, template_name = 'core/partidos.html'):
 
 @login_required
 def crear_apuesta(request, template_name = 'core/apuesta.html'):
-    i = 0
-    j = 0
+    x = 0
     lista_resultados = []
-    apuesta = Apuesta.objects.filter(usuario=request.user).latest('jornada')
-    partidos = Partido.objects.filter(jornada=apuesta.jornada)
+    jornada = Jornada.objects.latest('numero')
+    partidos = Partido.objects.filter(jornada=jornada)
     if request.method == 'POST':
         for i in range(1, 16):
             if 'signo-'+str(i) in request.POST.keys():
                 lista_resultados.append(request.POST.getlist('signo-'+str(i)))
         apuestas = reducir_apuestas(generar_apuestas(lista_resultados))
         for lista_resultados in apuestas:
-            i += 1
-            apuesta.numero = i
+            x += 1
+            y = 0
+            apuesta = Apuesta()
+            apuesta.numero = x
+            apuesta.usuario = request.user
+            apuesta.jornada = jornada
             apuesta.save()
             for signo in lista_resultados:
                 resultado = Resultado()
-                j += 1
+                y += 1
                 resultado.signo = signo
-                resultado.casilla = j
-                resultado.apuesta = i
+                resultado.casilla = y
+                resultado.apuesta = apuesta
                 resultado.save()
     return render_to_response('core/apuesta.html',
-            {'apuesta':apuesta, 'partidos':partidos},
+            {'jornada':jornada, 'partidos':partidos},
             context_instance=RequestContext(request))
 
 def generar_apuestas(lista):
