@@ -1,0 +1,7 @@
+# Python binary files
+*pyc
+# Vim swap files
+*swp
+# Backup
+*json
+*sql
