@@ -6,8 +6,8 @@
   <p>{{ partido.casilla}} {{ partido.local }} - {{ partido.visitante }}
   <select name="signo-{{ partido.casilla }}">
     <option value="1">1</option>
-    <option value="X">X</option>
-    <option value="2">2</option>
+    <option value="X" {% if partido.signo|stringformat:'s' == 'X' %}selected{% endif %}>X</option>
+    <option value="2" {% if partido.signo|stringformat:'s' == '2' %}selected{% endif %}>2</option>
   </select></p>
   {% endfor %}
   <input type="submit" value="Submit" />
