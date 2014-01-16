@@ -57,7 +57,7 @@ def crear_jornada(request, template_name = 'core/partidos.html'):
                 partido.casilla = i
                 partido.jornada = jornada
                 partido.save()
-            return render_to_response('core/apuesta_list.html', {},
+            return render_to_response('core/main.html', {},
                 context_instance=RequestContext(request))
     return render_to_response('core/partidos.html',
             {'jornada_form':jornada_form, 'partidos_formset':partidos_formset},
@@ -89,6 +89,8 @@ def crear_apuesta(request, template_name = 'core/apuesta.html'):
                 resultado.casilla = y
                 resultado.apuesta = apuesta
                 resultado.save()
+        return render_to_response('core/main.html', {},
+                context_instance=RequestContext(request))
     return render_to_response('core/apuesta.html',
             {'jornada':jornada, 'partidos':partidos},
             context_instance=RequestContext(request))
@@ -126,6 +128,22 @@ def reducir_apuestas (matriz):
             if i == j:
                 aux.append(matriz[matriz_apuestas.index(i)])
     return aux
+
+@login_required
+def crear_resultado(request, template_name = 'core/resultados.html'):
+    jornada = Jornada.objects.latest('numero')
+    partidos = Partido.objects.filter(jornada=jornada)
+    if request.method == 'POST':
+        for i in range(1, 16):
+            if 'signo-'+str(i) in request.POST.keys():
+                partido = Partido.objects.get(jornada=jornada, casilla=i)
+                partido.signo = request.POST.get('signo-'+str(i))
+                partido.save()
+        return render_to_response('core/main.html', {},
+                context_instance=RequestContext(request))
+    return render_to_response('core/resultados.html',
+            {'jornada':jornada, 'partidos':partidos},
+            context_instance=RequestContext(request))
 
 #class CrearApuesta(ListView):
 #    model = Apuesta

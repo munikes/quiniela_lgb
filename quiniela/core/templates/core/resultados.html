@@ -1,0 +1,18 @@
+{% if user.is_authenticated %}
+<form method="post" action=".">{% csrf_token %}
+  <p>Resultados:</p>
+  <p>Jornada: {{ jornada.numero }}
+  {% for partido in partidos  %}
+  <p>{{ partido.casilla}} {{ partido.local }} - {{ partido.visitante }}
+  <select name="signo-{{ partido.casilla }}">
+    <option value="1">1</option>
+    <option value="X">X</option>
+    <option value="2">2</option>
+  </select></p>
+  {% endfor %}
+  <input type="submit" value="Submit" />
+</form>
+<a href="/logout/">Logout</a>
+{% else %}
+<a href="/">Login</a>
+{% endif %}

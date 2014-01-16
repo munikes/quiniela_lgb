@@ -3,6 +3,7 @@
   {% if perms.staff %}
   <a href="{% url "crear_jornada" %}">Nueva Jornada</a>
   <a href="{% url "crear_apuesta" %}">Nueva Apuesta</a>
+  <a href="{% url "crear_resultado" %}">Poner Resultado</a>
   {% else %}
   <a href="{% url "crear_apuesta" %}">Nueva Apuesta</a>
   {% endif %}
