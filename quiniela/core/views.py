@@ -28,8 +28,8 @@ from django.views.generic.edit import CreateView
 from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
 from django.core.urlresolvers import reverse_lazy
-from extra_views import ModelFormSetView, InlineFormSet, CreateWithInlinesView
-from extra_views.generic import GenericInlineFormSet
+#from extra_views import ModelFormSetView, InlineFormSet, CreateWithInlinesView
+#from extra_views.generic import GenericInlineFormSet
 from django.forms.formsets import formset_factory
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -158,7 +158,7 @@ class CrearJornada(CreateView):
     model = Jornada
     success_url = reverse_lazy('crear_partidos')
 
-class CrearPartidos(ModelFormSetView):
-    template_name = 'core/partidos_formset.html'
-    model = Partido
-    extra = 15
+#class CrearPartidos(ModelFormSetView):
+#    template_name = 'core/partidos_formset.html'
+#    model = Partido
+#    extra = 15
