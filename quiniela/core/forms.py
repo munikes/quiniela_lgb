@@ -21,15 +21,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from django.forms import ModelForm, CharField, HiddenInput
-from django.forms.formsets import formset_factory
 
-from quiniela.core.models import Apuesta, Partido, Jornada
-
-class ApuestaForm(ModelForm):
-
-    class Meta:
-        model = Apuesta
-        exclude = ('usuarios',)
+from quiniela.core.models import Partido, Jornada, Premio
 
 
 class JornadaForm(ModelForm):
@@ -48,10 +41,8 @@ class PartidoForm(ModelForm):
         fields = ('casilla', 'local', 'visitante',)
 
 
-CrearApuestaFormSet = formset_factory(ApuestaForm, PartidoForm)
-
-class CrearApuestaForm(ModelForm):
+class PremioForm(ModelForm):
 
     class Meta:
-        model = Apuesta
-        exclude = ('usuarios',)
+        model = Premio
+        fields = ('categoria', 'cantidad',)

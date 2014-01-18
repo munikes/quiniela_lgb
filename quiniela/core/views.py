@@ -21,8 +21,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from quiniela.core.models import Apuesta, Partido, Jornada, Resultado
-from quiniela.core.forms import JornadaForm, PartidoForm
+from quiniela.core.models import Apuesta, Partido, Jornada, Resultado, Premio
+from quiniela.core.forms import JornadaForm, PartidoForm, PremioForm
 
 from django.forms.formsets import formset_factory
 from django.shortcuts import render_to_response
@@ -121,6 +121,8 @@ def crear_apuesta(request, template_name = 'core/apuesta.html'):
 def crear_resultado(request, template_name = 'core/resultados.html'):
     jornada = Jornada.objects.latest('numero')
     partidos = Partido.objects.filter(jornada=jornada)
+    premio_form = PremioForm()
+    premio = Premio()
     if request.method == 'POST':
         for i in range(1, 16):
             if 'signo-'+str(i) in request.POST.keys():
@@ -129,7 +131,7 @@ def crear_resultado(request, template_name = 'core/resultados.html'):
                 partido.save()
         return redirect(principal)
     return render_to_response('core/resultados.html',
-            {'jornada':jornada, 'partidos':partidos},
+            {'jornada':jornada, 'partidos':partidos, 'premio_form':premio_form, 'premio':premio},
             context_instance=RequestContext(request))
 
 def generar_apuestas(lista):

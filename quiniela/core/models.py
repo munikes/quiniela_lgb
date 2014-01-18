@@ -127,12 +127,12 @@ class Resultado (models.Model):
 
 class Premio (models.Model):
     OPCIONES = (
-            (0, 'pleno al 15'),
-            (1, '1ª categoría (14)'),
-            (2, '2ª categoría (13)'),
-            (3, '3ª categoría (12)'),
-            (4, '4ª categoría (11)'),
-            (5, '5ª categoría (10)'),
+            (15, 'pleno al 15'),
+            (14, '1ª categoría (14)'),
+            (13, '2ª categoría (13)'),
+            (12, '3ª categoría (12)'),
+            (11, '4ª categoría (11)'),
+            (10, '5ª categoría (10)'),
             )
     jornada = models.ForeignKey(Jornada)
     categoria = models.PositiveSmallIntegerField(verbose_name='categoria',
