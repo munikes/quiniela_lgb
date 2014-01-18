@@ -1,9 +1,0 @@
-{% if user.is_authenticated %}
-<form method="post">{% csrf_token %}
-  {{ form.as_p }}
-  <input type="submit" value="Submit" />
-</form>
-<a href="/logout/">logout</a>
-{% else %}
-<a href="/">login</a>
-{% endif %}
