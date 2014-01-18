@@ -24,21 +24,45 @@
 from quiniela.core.models import Apuesta, Partido, Jornada, Resultado
 from quiniela.core.forms import JornadaForm, PartidoForm
 
-from django.views.generic.edit import CreateView
-from django.views.generic.base import TemplateView
-from django.views.generic.list import ListView
-from django.core.urlresolvers import reverse_lazy
-#from extra_views import ModelFormSetView, InlineFormSet, CreateWithInlinesView
-#from extra_views.generic import GenericInlineFormSet
 from django.forms.formsets import formset_factory
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from django.db.models import Max
+from django.shortcuts import redirect
 
-class Principal(TemplateView):
-    template_name = 'core/main.html'
+@login_required
+def principal(request, template_name = 'core/main.html'):
+    usuarios = []
+    respuesta = []
+    jornada = Jornada.objects.latest('numero')
+    partidos = Partido.objects.filter(jornada=jornada)
+    apuestas = Apuesta.objects.filter(jornada=jornada)
+    for apuesta in apuestas:
+        usuario = apuesta.usuario
+        if not usuario in usuarios:
+            usuarios.append(usuario)
+    for usuario in usuarios:
+        matriz_resultados = []
+        lista_aciertos = []
+        apuestas = Apuesta.objects.filter(jornada=jornada, usuario=usuario)
+        for apuesta in apuestas:
+            resultados = Resultado.objects.filter(apuesta=apuesta).values('signo')
+            matriz_resultados.append(resultados)
+            aciertos = obtener_aciertos(resultados, partidos.values('signo'))
+            if aciertos >= 10:
+                lista_aciertos.append(aciertos)
+            premio = 0
+        entrada = {'usuario':usuario, 'aciertos_10':lista_aciertos.count(10),
+                'aciertos_11':lista_aciertos.count(11),
+                'aciertos_12':lista_aciertos.count(12),
+                'aciertos_13':lista_aciertos.count(13),
+                'aciertos_14':lista_aciertos.count(14),
+                'aciertos_15':lista_aciertos.count(15),
+                'aciertos':lista_aciertos,
+                'apuesta': crear_lista_apuestas(matriz_resultados)}
+        respuesta.append(entrada)
+    return render_to_response('core/main.html', { 'respuesta':respuesta, 'partidos':partidos },
+            context_instance=RequestContext (request))
 
 @login_required
 def crear_jornada(request, template_name = 'core/partidos.html'):
@@ -57,8 +81,7 @@ def crear_jornada(request, template_name = 'core/partidos.html'):
                 partido.casilla = i
                 partido.jornada = jornada
                 partido.save()
-            return render_to_response('core/main.html', {},
-                context_instance=RequestContext(request))
+            return redirect(principal)
     return render_to_response('core/partidos.html',
             {'jornada_form':jornada_form, 'partidos_formset':partidos_formset},
             context_instance=RequestContext(request))
@@ -89,9 +112,23 @@ def crear_apuesta(request, template_name = 'core/apuesta.html'):
                 resultado.casilla = y
                 resultado.apuesta = apuesta
                 resultado.save()
-        return render_to_response('core/main.html', {},
-                context_instance=RequestContext(request))
+        return redirect(principal)
     return render_to_response('core/apuesta.html',
+            {'jornada':jornada, 'partidos':partidos},
+            context_instance=RequestContext(request))
+
+@login_required
+def crear_resultado(request, template_name = 'core/resultados.html'):
+    jornada = Jornada.objects.latest('numero')
+    partidos = Partido.objects.filter(jornada=jornada)
+    if request.method == 'POST':
+        for i in range(1, 16):
+            if 'signo-'+str(i) in request.POST.keys():
+                partido = Partido.objects.get(jornada=jornada, casilla=i)
+                partido.signo = request.POST.get('signo-'+str(i))
+                partido.save()
+        return redirect(principal)
+    return render_to_response('core/resultados.html',
             {'jornada':jornada, 'partidos':partidos},
             context_instance=RequestContext(request))
 
@@ -129,36 +166,24 @@ def reducir_apuestas (matriz):
                 aux.append(matriz[matriz_apuestas.index(i)])
     return aux
 
-@login_required
-def crear_resultado(request, template_name = 'core/resultados.html'):
-    jornada = Jornada.objects.latest('numero')
-    partidos = Partido.objects.filter(jornada=jornada)
-    if request.method == 'POST':
-        for i in range(1, 16):
-            if 'signo-'+str(i) in request.POST.keys():
-                partido = Partido.objects.get(jornada=jornada, casilla=i)
-                partido.signo = request.POST.get('signo-'+str(i))
-                partido.save()
-        return render_to_response('core/main.html', {},
-                context_instance=RequestContext(request))
-    return render_to_response('core/resultados.html',
-            {'jornada':jornada, 'partidos':partidos},
-            context_instance=RequestContext(request))
+def crear_lista_apuestas(matriz):
+    lista = []
+    for i in range(len(matriz)):
+        for j in range(len(matriz[i])):
+            aux = []
+            if i == 0:
+                aux.append(matriz[0][j])
+                lista.append(aux)
+            if not matriz[i][j] in lista[j]:
+                lista[j].append(matriz[i][j])
+    return lista
 
-#class CrearApuesta(ListView):
-#    model = Apuesta
-#    success_url = reverse_lazy('principal')
-#    template_name = 'core/apuesta.html'
-#
-#    def get_queryset(self):
-#        apuesta = Apuesta.objects.filter(usuario=self.request.user).latest('jornada')
-#        return Partido.objects.filter(jornada=apuesta.jornada)
-
-class CrearJornada(CreateView):
-    model = Jornada
-    success_url = reverse_lazy('crear_partidos')
-
-#class CrearPartidos(ModelFormSetView):
-#    template_name = 'core/partidos_formset.html'
-#    model = Partido
-#    extra = 15
+def obtener_aciertos(apuesta, resultado):
+    aciertos = 0
+    for i in range(len(apuesta)-1):
+        if apuesta[i] == resultado[i]:
+            aciertos += 1
+    if aciertos == len(apuesta)-1:
+        if apuesta[len(apuesta)-1] == resultado[len(apuesta)-1]:
+            aciertos += 1
+    return aciertos

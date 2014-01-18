@@ -1,6 +1,5 @@
 from django.conf.urls import patterns, include, url
 from quiniela.core import views
-from quiniela.core.views import Principal
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -8,12 +7,10 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
 
-    #url(r'^$', Inicio.as_view(), name='inicio'),
-    url(r'^main/$', Principal.as_view(), name='principal'),
+    url(r'^main/$', views.principal, name='principal'),
     url(r'^new_jornada/$', views.crear_jornada, name='crear_jornada'),
     url(r'^new_apuesta/$', views.crear_apuesta, name='crear_apuesta'),
     url(r'^new_resultado/$', views.crear_resultado, name='crear_resultado'),
-    #url(r'^new_apuesta/$', CrearApuesta.as_view(), name='crear_apuesta'),
     url(r'^$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
     url(r'^logout/$', 'django.contrib.auth.views.logout', {'template_name': 'logout.html'}),
     # url(r'^quiniela/', include('quiniela.foo.urls')),

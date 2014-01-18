@@ -3,7 +3,7 @@
   <p>Usuario: {{ user.username }}</p>
   <p>Jornada: {{ jornada.numero }}
   {% for partido in partidos  %}
-    <p>{{ partido.casilla}} {{ partido.local }} - {{ partido.visitante }}
+    <p>{{ partido.casilla }} {{ partido.local }} - {{ partido.visitante }}
     {% if partido.casilla != 15 %}
     1<input type="checkbox" name="signo-{{ partido.casilla }}" id="1_{{ partido.casilla }}" value="1">
     X<input type="checkbox" name="signo-{{ partido.casilla }}" id="X_{{ partido.casilla }}" value="X">

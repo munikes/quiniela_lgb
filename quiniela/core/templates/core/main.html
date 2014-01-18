@@ -1,5 +1,50 @@
 {% if user.is_authenticated %}
-<h1>Apuesta</h1>
+<h1>Jornada: {{ jornada.numero }}</h1>
+<table border='1'>
+  <tr>
+    <td></td>
+    {% for elemento in respuesta %}
+    <th>{{ elemento.usuario }}</th>
+    {% endfor %}
+    <th>quiniela</th>
+  </tr>
+  <tr>
+    <td>
+    {% for partido in partidos %}
+    {{ partido.local }}-{{ partido.visitante }}<br/>
+    {% endfor %}
+    </td>
+    {% for elemento in respuesta %}
+    <td>
+      {% for signo in elemento.apuesta %}
+        {% for i in signo %}
+          {{ i.signo }}
+        {% endfor %}
+        <br/>
+      {% endfor %}
+    </td>
+    {% endfor %}
+    <td>
+      {% for partido in partidos %}
+      {{ partido.signo }}<br/>
+      {% endfor %}
+    </td>
+  </tr>
+  <tr>
+    <td>Aciertos</td>
+    {% for elemento in respuesta %}
+    <td>
+      15: {{ elemento.aciertos_15 }}<br/>
+      14: {{ elemento.aciertos_14 }}<br/>
+      13: {{ elemento.aciertos_13 }}<br/>
+      12: {{ elemento.aciertos_12 }}<br/>
+      11: {{ elemento.aciertos_11 }}<br/>
+      10: {{ elemento.aciertos_10 }}<br/>
+    </td>
+    {% endfor %}
+  </tr>
+</table>
+
   {% if perms.staff %}
   <a href="{% url "crear_jornada" %}">Nueva Jornada</a>
   <a href="{% url "crear_apuesta" %}">Nueva Apuesta</a>
