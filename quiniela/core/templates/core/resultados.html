@@ -1,10 +1,12 @@
 {% if user.is_authenticated %}
 <form method="post" action=".">{% csrf_token %}
-  <p>Resultados:</p>
+{{ premios_formset.management_form }}
+  {{ premios_formset.non_form_errors }}
+  <h1>Resultados:</h1>
   <p>Jornada: {{ jornada.numero }}</p>
   <p align="justify">
   {% for partido in partidos  %}
-  {{ partido.casilla}} {{ partido.local }} - {{ partido.visitante }}
+  {{ partido.casilla }} {{ partido.local }} - {{ partido.visitante }}
   <select name="signo-{{ partido.casilla }}">
     <option value="1">1</option>
     <option value="X" {% if partido.signo|stringformat:'s' == 'X' %}selected{% endif %}>X</option>
@@ -12,13 +14,13 @@
   </select><br/>
   {% endfor %}
   </p>
-  <p>{{ premio_form.as_p }}</p>
-  {{ premio_form.categoria.field.get_opciones_display }}
-  {% for value, text in premio_form.categoria.field.choices %}
-  {% if value %}
-      {{value}}{{ text }}<br/>
-    {% endif %}
+  <p>Premios:</p>
+  <p>
+  {% for categoria, cantidad in premios_formset %}
+    {{ cantidad.errors }}
+   {{ categoria }}{{ cantidad }}<br/>
   {% endfor %}
+  </p>
   <input type="submit" value="Submit" />
 </form>
 <a href="/logout/">Logout</a>

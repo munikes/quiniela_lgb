@@ -21,9 +21,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from quiniela.core.models import Apuesta, Partido, Jornada, Resultado, Premio
-from quiniela.core.forms import JornadaForm, PartidoForm, PremioForm
-
+from quiniela.core.models import Apuesta, Partido, Jornada, Resultado
+from quiniela.core.forms import (JornadaForm, PartidoForm, PremioForm,
+                                ResultadoForm, BaseResultadosFormSet)
 from django.forms.formsets import formset_factory
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -61,7 +61,8 @@ def principal(request, template_name = 'core/main.html'):
                 'aciertos':lista_aciertos,
                 'apuesta': crear_lista_apuestas(matriz_resultados)}
         respuesta.append(entrada)
-    return render_to_response('core/main.html', { 'respuesta':respuesta, 'partidos':partidos },
+    return render_to_response('core/main.html', {'usuarios':usuarios, 'jornada':jornada,
+        'respuesta':respuesta, 'partidos':partidos },
             context_instance=RequestContext (request))
 
 @login_required
@@ -92,46 +93,60 @@ def crear_apuesta(request, template_name = 'core/apuesta.html'):
     lista_resultados = []
     jornada = Jornada.objects.latest('numero')
     partidos = Partido.objects.filter(jornada=jornada)
+    ResultadosFormSet = formset_factory(ResultadoForm, extra=15, max_num=15,
+            validate_max=True, formset=BaseResultadosFormSet)
+    resultados_formset = ResultadosFormSet()
     if request.method == 'POST':
-        for i in range(1, 16):
-            if 'signo-'+str(i) in request.POST.keys():
-                lista_resultados.append(request.POST.getlist('signo-'+str(i)))
-        apuestas = reducir_apuestas(generar_apuestas(lista_resultados))
-        for lista_resultados in apuestas:
-            x += 1
-            y = 0
-            apuesta = Apuesta()
-            apuesta.numero = x
-            apuesta.usuario = request.user
-            apuesta.jornada = jornada
-            apuesta.save()
-            for signo in lista_resultados:
-                resultado = Resultado()
-                y += 1
-                resultado.signo = signo
-                resultado.casilla = y
-                resultado.apuesta = apuesta
-                resultado.save()
-        return redirect(principal)
+        resultados_formset = ResultadosFormSet(request.POST)
+        if resultados_formset.is_valid():
+            for form in resultados_formset:
+                lista_resultados.append(form.cleaned_data.get('signo'))
+            apuestas = reducir_apuestas(generar_apuestas(lista_resultados))
+            for lista_resultados in apuestas:
+                x += 1
+                y = 0
+                apuesta = Apuesta()
+                apuesta.numero = x
+                apuesta.usuario = request.user
+                apuesta.jornada = jornada
+                apuesta.save()
+                for signo in lista_resultados:
+                    resultado = Resultado()
+                    y += 1
+                    resultado.signo = signo
+                    partido = Partido.objects.get(casilla=y, jornada=jornada)
+                    resultado.partido = partido
+                    resultado.apuesta = apuesta
+                    resultado.save()
+            return redirect(principal)
+    lista = zip(resultados_formset, partidos)
     return render_to_response('core/apuesta.html',
-            {'jornada':jornada, 'partidos':partidos},
+            {'jornada':jornada, 'partidos':partidos,
+                'resultados_formset':resultados_formset, 'lista':lista},
             context_instance=RequestContext(request))
 
 @login_required
 def crear_resultado(request, template_name = 'core/resultados.html'):
     jornada = Jornada.objects.latest('numero')
     partidos = Partido.objects.filter(jornada=jornada)
-    premio_form = PremioForm()
-    premio = Premio()
+    PremiosFormSet = formset_factory(PremioForm, extra=6)
+    premios_formset = PremiosFormSet()
+    premio = PremioForm()
     if request.method == 'POST':
         for i in range(1, 16):
             if 'signo-'+str(i) in request.POST.keys():
                 partido = Partido.objects.get(jornada=jornada, casilla=i)
                 partido.signo = request.POST.get('signo-'+str(i))
                 partido.save()
-        return redirect(principal)
+        premios_formset = PremiosFormSet(request.POST)
+        if premios_formset.is_valid():
+            for form in premios_formset:
+                premio = form.save(commit=False)
+                premio.jornada = jornada
+                premio.save()
+            return redirect(principal)
     return render_to_response('core/resultados.html',
-            {'jornada':jornada, 'partidos':partidos, 'premio_form':premio_form, 'premio':premio},
+            {'jornada':jornada, 'partidos':partidos, 'premios_formset':premios_formset, 'premio':premio},
             context_instance=RequestContext(request))
 
 def generar_apuestas(lista):

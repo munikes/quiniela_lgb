@@ -1,19 +1,35 @@
 {% if user.is_authenticated %}
 <form method="post" action=".">{% csrf_token %}
+  <h1>Apuesta:</h1>
+  {{ resultados_formset.management_form }}
   <p>Usuario: {{ user.username }}</p>
-  <p>Jornada: {{ jornada.numero }}
-  {% for partido in partidos  %}
-    <p>{{ partido.casilla }} {{ partido.local }} - {{ partido.visitante }}
+  <p>Jornada: {{ jornada.numero }}</p>
+  <p>
+  {{ resultados_formset.non_form_errors }}
+  {% for form, partido in lista %}
+  {{ partido.casilla }} {{ partido.local }} - {{ partido.visitante }} 
+    {% for choice in form.signo.field.choices %}
     {% if partido.casilla != 15 %}
-    1<input type="checkbox" name="signo-{{ partido.casilla }}" id="1_{{ partido.casilla }}" value="1">
-    X<input type="checkbox" name="signo-{{ partido.casilla }}" id="X_{{ partido.casilla }}" value="X">
-    2<input type="checkbox" name="signo-{{ partido.casilla }}" id="2_{{ partido.casilla }}" value="2"></p>
-    {% else %}
-    1<input type="radio" name="signo-{{ partido.casilla }}" id="1_{{ partido.casilla }}" value="1">
-    X<input type="radio" name="signo-{{ partido.casilla }}" id="X_{{ partido.casilla }}" value="X">
-    2<input type="radio" name="signo-{{ partido.casilla }}" id="2_{{ partido.casilla }}" value="2"></p>
-    {% endif %}
+    {{ choice.0 }}<input type="checkbox"
+                  id="id_form-{{ forloop.parentloop.counter0 }}-signo"
+                  name="form-{{ forloop.parentloop.counter0 }}-signo"
+                  {% if form.signo.data.0 == choice.0 or form.signo.data.1 == choice.0 or form.signo.data.2 == choice.0 %}
+                  checked="checked"
+                  {% endif %}
+                  value="{{ choice.1 }}"/>
+      {% else %}
+      {{ choice.0 }}<input type="radio"
+                  id="id_form-{{ forloop.parentloop.counter0 }}-signo"
+                  name="form-{{ forloop.parentloop.counter0 }}-signo"
+                  {% if form.signo.data.0 == choice.0 %}
+                  checked="checked"
+                  {% endif %}
+                  value="{{ choice.1 }}"/>
+      {% endif %}
+    {% endfor %}
+    <br/>
   {% endfor %}
+  </p>
   <input type="submit" value="Submit" />
 </form>
 <a href="/logout/">Logout</a>

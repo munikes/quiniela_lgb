@@ -20,9 +20,11 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from django.forms import ModelForm, CharField, HiddenInput
+from django.forms import (ModelForm, CharField, HiddenInput, MultipleChoiceField,
+                        CheckboxSelectMultiple, ValidationError)
+from django.forms.formsets import BaseFormSet
 
-from quiniela.core.models import Partido, Jornada, Premio
+from quiniela.core.models import Partido, Jornada, Resultado, Premio
 
 
 class JornadaForm(ModelForm):
@@ -39,6 +41,38 @@ class PartidoForm(ModelForm):
     class Meta:
         model = Partido
         fields = ('casilla', 'local', 'visitante',)
+
+
+class ResultadoForm(ModelForm):
+    OPCIONES = (
+            ('1', '1'),
+            ('X', 'X'),
+            ('2', '2'),
+            )
+    signo = MultipleChoiceField(widget=CheckboxSelectMultiple, choices=OPCIONES)
+
+    class Meta:
+        model = Resultado
+        fields = ('signo',)
+
+
+class BaseResultadosFormSet(BaseFormSet):
+    def clean(self):
+        """Mira si el conjunto de formularios tiene siete dobles."""
+        if any(self.errors):
+            # Don't bother validating the formset unless each form is valid on its own
+            return
+        dobles = 0
+        for form in self.forms:
+            if not form.cleaned_data.get('signo'):
+                raise ValidationError("Debes de insertar todos los resultados.")
+            signo = form.cleaned_data['signo']
+            if len(signo) == 3:
+                raise ValidationError("No se puede insertar ningún triple.")
+            if len(signo) == 2:
+                dobles += 1
+        if dobles != 7:
+            raise ValidationError("El número de dobles es distinto de 7.")
 
 
 class PremioForm(ModelForm):
