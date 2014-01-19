@@ -89,7 +89,7 @@ class Apuesta (models.Model):
 class Partido (models.Model):
     jornada = models.ForeignKey(Jornada)
     signo = models.CharField(max_length=1, choices=OPCIONES,
-            verbose_name = 'Resultado')
+            verbose_name = 'Resultado', default='')
     local = models.CharField(max_length=20, verbose_name='Local',
             choices=EQUIPOS)
     visitante = models.CharField(max_length=20, verbose_name='Visitante',
@@ -113,16 +113,13 @@ class Posicion (models.Model):
 
 
 class Resultado (models.Model):
-    signo = models.CharField(max_length=1, choices=OPCIONES,
+    signo = models.CharField(max_length=18,
             verbose_name = 'Resultado')
     apuesta = models.ForeignKey(Apuesta)
-    casilla = models.PositiveSmallIntegerField(verbose_name='Casilla', validators=[
-            MaxValueValidator(15),
-            MinValueValidator(1)
-        ], help_text='La casilla del partido.')
+    partido = models.ForeignKey(Partido)
 
     class Meta:
-        unique_together = (('apuesta', 'casilla'),)
+        unique_together = (('apuesta', 'partido'),)
 
 
 class Premio (models.Model):
@@ -136,6 +133,9 @@ class Premio (models.Model):
             )
     jornada = models.ForeignKey(Jornada)
     categoria = models.PositiveSmallIntegerField(verbose_name='categoria',
-            help_text ='categoria del premio', choices=OPCIONES)
+            choices=OPCIONES, default='')
     cantidad = models.DecimalField(verbose_name='Cantidad', max_digits=8,
-            decimal_places=2, help_text='Cantidad de euros.')
+            decimal_places=2)
+
+    class Meta:
+        unique_together = (('jornada', 'categoria'),)
