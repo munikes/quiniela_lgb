@@ -1,5 +1,6 @@
 {% if user.is_authenticated %}
 <h1>Jornada: {{ jornada.numero }}</h1>
+{% if user in usuarios %}
 <table border='1'>
   <tr>
     <td></td>
@@ -44,13 +45,13 @@
     {% endfor %}
   </tr>
 </table>
-
-  {% if perms.staff %}
+{% endif %}
+  {% if user.is_staff %}
   <a href="{% url "crear_jornada" %}">Nueva Jornada</a>
-  <a href="{% url "crear_apuesta" %}">Nueva Apuesta</a>
+  {% if not user in usuarios %}<a href="{% url "crear_apuesta" %}">Nueva Apuesta</a>{% endif %}
   <a href="{% url "crear_resultado" %}">Poner Resultado</a>
-  {% else %}
-  <a href="{% url "crear_apuesta" %}">Nueva Apuesta</a>
+  {% elif user.is_active %}
+  {% if not user in usuarios %}<a href="{% url "crear_apuesta" %}">Nueva Apuesta</a>{% endif %}
   {% endif %}
   <a href="/logout/">Logout</a>
 {% else %}
