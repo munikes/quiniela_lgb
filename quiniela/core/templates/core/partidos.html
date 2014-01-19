@@ -2,9 +2,11 @@
 <form method="post">{% csrf_token %}
 {{ partidos_formset.management_form }}
   <p>{{ jornada_form.as_p }}</p>
+  <p>
   {% for form in partidos_formset %}
-    <p>{{ form }}</p>
+    {{ form }}<br/>
   {% endfor %}
+  </p>
   <input type="submit" value="Submit" />
 </form>
 <a href="/logout/">Logout</a>
