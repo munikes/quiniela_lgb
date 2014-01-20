@@ -21,7 +21,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from quiniela.core.models import Apuesta, Partido, Jornada, Resultado
+from quiniela.core.models import Apuesta, Partido, Jornada, Resultado, Premio
 from quiniela.core.forms import (JornadaForm, PartidoForm, PremioForm,
                                 ResultadoForm, BaseResultadosFormSet)
 from django.forms.formsets import formset_factory
@@ -34,6 +34,7 @@ from django.shortcuts import redirect
 def principal(request, template_name = 'core/main.html'):
     usuarios = []
     respuesta = []
+    total_premio = 0
     jornada = Jornada.objects.latest('numero')
     partidos = Partido.objects.filter(jornada=jornada)
     apuestas = Apuesta.objects.filter(jornada=jornada)
@@ -51,7 +52,13 @@ def principal(request, template_name = 'core/main.html'):
             aciertos = obtener_aciertos(resultados, partidos.values('signo'))
             if aciertos >= 10:
                 lista_aciertos.append(aciertos)
-            premio = 0
+        premio = (Premio.objects.get(jornada=jornada, categoria=10).cantidad * lista_aciertos.count(10) +
+        Premio.objects.get(jornada=jornada, categoria=11).cantidad * lista_aciertos.count(11) +
+        Premio.objects.get(jornada=jornada, categoria=12).cantidad * lista_aciertos.count(12) +
+        Premio.objects.get(jornada=jornada, categoria=13).cantidad * lista_aciertos.count(13) +
+        Premio.objects.get(jornada=jornada, categoria=14).cantidad * lista_aciertos.count(14) +
+        Premio.objects.get(jornada=jornada, categoria=15).cantidad * lista_aciertos.count(15))
+        total_premio += premio
         entrada = {'usuario':usuario, 'aciertos_10':lista_aciertos.count(10),
                 'aciertos_11':lista_aciertos.count(11),
                 'aciertos_12':lista_aciertos.count(12),
@@ -59,10 +66,11 @@ def principal(request, template_name = 'core/main.html'):
                 'aciertos_14':lista_aciertos.count(14),
                 'aciertos_15':lista_aciertos.count(15),
                 'aciertos':lista_aciertos,
-                'apuesta': crear_lista_apuestas(matriz_resultados)}
+                'apuesta':crear_lista_apuestas(matriz_resultados),
+                'premio':premio}
         respuesta.append(entrada)
     return render_to_response('core/main.html', {'usuarios':usuarios, 'jornada':jornada,
-        'respuesta':respuesta, 'partidos':partidos },
+        'respuesta':respuesta, 'partidos':partidos, 'total_premio':total_premio },
             context_instance=RequestContext (request))
 
 @login_required

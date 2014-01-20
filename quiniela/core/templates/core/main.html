@@ -44,6 +44,19 @@
     </td>
     {% endfor %}
   </tr>
+  <tr>
+    <td>Premio</td>
+    {% for elemento in respuesta %}
+    <td>
+      {{ elemento.premio }} €
+    </td>
+    {% endfor %}
+    <td>
+    {{ total_premio }} €
+    </td>
+  </tr>
+
+
 </table>
 {% endif %}
   {% if user.is_staff %}
