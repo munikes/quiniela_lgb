@@ -134,7 +134,7 @@ class Premio (models.Model):
     jornada = models.ForeignKey(Jornada)
     categoria = models.PositiveSmallIntegerField(verbose_name='categoria',
             choices=OPCIONES, default='')
-    cantidad = models.DecimalField(verbose_name='Cantidad', max_digits=8,
+    cantidad = models.DecimalField(verbose_name='Cantidad', max_digits=10,
             decimal_places=2)
 
     class Meta:
