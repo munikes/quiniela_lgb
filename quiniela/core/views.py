@@ -21,7 +21,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from quiniela.core.models import Apuesta, Partido, Jornada, Resultado, Premio
+from quiniela.core.models import (Apuesta, Partido, Jornada, Resultado, Premio,
+                                Bolsa, Posicion)
 from quiniela.core.forms import (JornadaForm, PartidoForm, PremioForm,
                                 ResultadoForm, BaseResultadosFormSet)
 from django.forms.formsets import formset_factory
@@ -58,6 +59,18 @@ def principal(request, template_name = 'core/main.html'):
         Premio.objects.get(jornada=jornada, categoria=13).cantidad * lista_aciertos.count(13) +
         Premio.objects.get(jornada=jornada, categoria=14).cantidad * lista_aciertos.count(14) +
         Premio.objects.get(jornada=jornada, categoria=15).cantidad * lista_aciertos.count(15))
+        if not Bolsa.objects.filter(jornada=jornada, usuario=usuario):
+            bolsa = Bolsa()
+            bolsa.premio = premio
+            bolsa.usuario = usuario
+            bolsa.coste = 0 #TODO puesto
+            bolsa.jornada = jornada
+            bolsa.save()
+        if not Posicion.objects.filter(jornada=jornada, usuario=usuario):
+            posicion = Posicion()
+            apuesta =  crear_lista_apuestas(matriz_resultados)
+            for signo in apuesta:
+                print signo
         total_premio += premio
         entrada = {'usuario':usuario, 'aciertos_10':lista_aciertos.count(10),
                 'aciertos_11':lista_aciertos.count(11),
