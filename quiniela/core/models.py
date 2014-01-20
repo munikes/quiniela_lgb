@@ -99,17 +99,30 @@ class Partido (models.Model):
             MinValueValidator(1)
         ], help_text='La casilla del partido.', blank=True)
 
+    class Meta:
+        unique_together = (('local', 'visitante'),)
+
 
 class Bolsa (models.Model):
     usuario = models.OneToOneField(User)
-    cantidad = models.DecimalField(verbose_name='Cantidad', max_digits=8,
-            decimal_places=2, help_text='Cantidad de euros.')
+    jornada = models.ForeignKey(Jornada)
+    premio = models.DecimalField(verbose_name='Premio', max_digits=10,
+            decimal_places=2, help_text='Cantidad de euros ganados.')
+    coste = models.DecimalField(verbose_name='Coste apuestas', max_digits=5,
+            decimal_places=2, help_text='Coste de las apuestas.')
+
+    class Meta:
+        unique_together = (('jornada', 'usuario'),)
 
 
 class Posicion (models.Model):
     usuario = models.OneToOneField(User)
+    jornada = models.ForeignKey(Jornada)
     posicion = models.PositiveSmallIntegerField(verbose_name='Posicion',
             help_text='Posición que ocupas.')
+
+    class Meta:
+        unique_together = (('posicion', 'jornada', 'usuario'),)
 
 
 class Resultado (models.Model):
