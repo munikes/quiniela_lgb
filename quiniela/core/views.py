@@ -53,12 +53,33 @@ def principal(request, template_name = 'core/main.html'):
             aciertos = obtener_aciertos(resultados, partidos.values('signo'))
             if aciertos >= 10:
                 lista_aciertos.append(aciertos)
+        # calcular aciertos dobles y pleno
+        apuesta =  crear_lista_apuestas(matriz_resultados)
+        cont = 0
+        cont_aciertos = 0
+        cont_dobles = 0
+        cont_pleno = 0
+        for signo in apuesta:
+            for i in signo:
+                if (partidos[cont].signo == i.get('signo') and
+                        len(signo) != 1):
+                    cont_dobles += 1
+                    cont_aciertos += 1
+                elif (partidos[cont].signo == i.get('signo') and
+                        cont == len(partidos)-1):
+                    cont_pleno = 1
+                    cont_aciertos += 1
+                elif partidos[cont].signo == i.get('signo'):
+                    cont_aciertos += 1
+            cont += 1
+        # calculo del premio
         premio = (Premio.objects.get(jornada=jornada, categoria=10).cantidad * lista_aciertos.count(10) +
         Premio.objects.get(jornada=jornada, categoria=11).cantidad * lista_aciertos.count(11) +
         Premio.objects.get(jornada=jornada, categoria=12).cantidad * lista_aciertos.count(12) +
         Premio.objects.get(jornada=jornada, categoria=13).cantidad * lista_aciertos.count(13) +
         Premio.objects.get(jornada=jornada, categoria=14).cantidad * lista_aciertos.count(14) +
         Premio.objects.get(jornada=jornada, categoria=15).cantidad * lista_aciertos.count(15))
+        # inserto la bolsa del usuario
         if not Bolsa.objects.filter(jornada=jornada, usuario=usuario):
             bolsa = Bolsa()
             bolsa.premio = premio
@@ -66,11 +87,6 @@ def principal(request, template_name = 'core/main.html'):
             bolsa.coste = 0 #TODO puesto
             bolsa.jornada = jornada
             bolsa.save()
-        if not Posicion.objects.filter(jornada=jornada, usuario=usuario):
-            posicion = Posicion()
-            apuesta =  crear_lista_apuestas(matriz_resultados)
-            for signo in apuesta:
-                print signo
         total_premio += premio
         entrada = {'usuario':usuario, 'aciertos_10':lista_aciertos.count(10),
                 'aciertos_11':lista_aciertos.count(11),
@@ -79,9 +95,16 @@ def principal(request, template_name = 'core/main.html'):
                 'aciertos_14':lista_aciertos.count(14),
                 'aciertos_15':lista_aciertos.count(15),
                 'aciertos':lista_aciertos,
+                'numero_aciertos':cont_aciertos,
+                'dobles_aciertos':cont_dobles,
+                'pleno':cont_pleno,
                 'apuesta':crear_lista_apuestas(matriz_resultados),
                 'premio':premio}
         respuesta.append(entrada)
+    # inserto posicion
+    print sorted(respuesta, key=lambda entrada: entrada.get('numero_aciertos'))
+    if not Posicion.objects.filter(jornada=jornada, usuario=usuario):
+        posicion = Posicion()
     return render_to_response('core/main.html', {'usuarios':usuarios, 'jornada':jornada,
         'respuesta':respuesta, 'partidos':partidos, 'total_premio':total_premio },
             context_instance=RequestContext (request))
