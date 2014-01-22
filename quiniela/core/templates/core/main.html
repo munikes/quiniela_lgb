@@ -55,8 +55,18 @@
     {{ total_premio }} €
     </td>
   </tr>
-
-
+  <tr>
+    <td>Posici&oacute;n</td>
+    {% for elemento in respuesta %}
+    <td>
+      {% if elemento.posicion.posicion == respuesta|length %}
+        comemierda
+      {% else %}
+        {{ elemento.posicion.posicion }}
+      {% endif %}
+    </td>
+    {% endfor %}
+  </tr>
 </table>
 {% endif %}
   {% if user.is_staff %}
