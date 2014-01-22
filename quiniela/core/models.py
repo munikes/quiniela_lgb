@@ -74,6 +74,7 @@ EQUIPOS = (
 class Jornada (models.Model):
     numero = models.PositiveSmallIntegerField(primary_key=True,
             help_text='Jornada de liga.', verbose_name = 'Número')
+    anterior = models.ForeignKey('self', blank=True, null=True)
 
 
 class Apuesta (models.Model):

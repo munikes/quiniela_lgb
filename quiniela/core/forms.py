@@ -31,7 +31,7 @@ class JornadaForm(ModelForm):
 
     class Meta:
         model = Jornada
-        #exclude = ('usuarios',)
+        exclude = ('anterior',)
 
 
 class PartidoForm(ModelForm):
