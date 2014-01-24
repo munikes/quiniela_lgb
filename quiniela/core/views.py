@@ -22,9 +22,10 @@
 
 
 from quiniela.core.models import (Apuesta, Partido, Jornada, Resultado, Premio,
-                                Bolsa, Posicion)
+                                Bolsa, Posicion, Pagador)
 from quiniela.core.forms import (JornadaForm, PartidoForm, PremioForm,
-                                ResultadoForm, BaseResultadosFormSet)
+                                ResultadoForm, BaseResultadosFormSet,
+                                PagadorForm)
 from django.forms.formsets import formset_factory
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -76,7 +77,8 @@ def principal(request, template_name = 'core/main.html'):
                     cont += 1
             # obtengo la posicion_anterior
             try :
-                posicion_anterior = Posicion.objects.get(usuario=usuario,jornada=jornada.anterior)
+                posicion_anterior = Posicion.objects.get(usuario=usuario,
+                        jornada=jornada.anterior)
             except Posicion.DoesNotExist:
                 posicion_anterior = 1
             # calculo del premio
@@ -89,6 +91,7 @@ def principal(request, template_name = 'core/main.html'):
                 Premio.objects.get(jornada=jornada, categoria=14).cantidad * lista_aciertos.count(14) +
                 Premio.objects.get(jornada=jornada, categoria=15).cantidad * lista_aciertos.count(15))
                 # inserto la bolsa del usuario
+                pagador = Pagador.objects.get(jornada=jornada)
                 if not Bolsa.objects.filter(jornada=jornada, usuario=usuario):
                     bolsa = Bolsa()
                     bolsa.premio = premio
@@ -98,6 +101,8 @@ def principal(request, template_name = 'core/main.html'):
                     else:
                         if not bolsa.coste:
                             bolsa.coste = 8
+                    if pagador.usuario == bolsa.usuario:
+                        bolsa.coste = bolsa.coste - 64
                     bolsa.jornada = jornada
                     bolsa.save()
                 total_premio += premio
@@ -127,9 +132,9 @@ def principal(request, template_name = 'core/main.html'):
                 if entrada.get('usuario') == posicion.usuario:
                     entrada['posicion'] = posicion
                     break
-        return render_to_response('core/main.html', {'usuarios':usuarios, 'jornada':jornada,
-            'respuesta':respuesta, 'partidos':partidos, 'total_premio':total_premio,
-            'posiciones':posiciones},
+        return render_to_response('core/main.html', {'usuarios':usuarios,
+            'jornada':jornada,'respuesta':respuesta, 'partidos':partidos,
+            'total_premio':total_premio,'posiciones':posiciones},
                 context_instance=RequestContext (request))
     except Jornada.DoesNotExist:
         return render_to_response('core/main.html', {},
@@ -205,22 +210,25 @@ def crear_resultado(request, template_name = 'core/resultados.html'):
     partidos = Partido.objects.filter(jornada=jornada)
     PremiosFormSet = formset_factory(PremioForm, extra=6)
     premios_formset = PremiosFormSet()
-    premio = PremioForm()
+    pagador_form = PagadorForm(initial={'jornada':jornada.numero})
     if request.method == 'POST':
-        for i in range(1, 16):
-            if 'signo-'+str(i) in request.POST.keys():
-                partido = Partido.objects.get(jornada=jornada, casilla=i)
-                partido.signo = request.POST.get('signo-'+str(i))
-                partido.save()
         premios_formset = PremiosFormSet(request.POST)
-        if premios_formset.is_valid():
+        pagador_form = PagadorForm(request.POST)
+        if premios_formset.is_valid() and  pagador_form.is_valid():
             for form in premios_formset:
                 premio = form.save(commit=False)
                 premio.jornada = jornada
                 premio.save()
+            pagador_form.save()
+            for i in range(1, 16):
+                if 'signo-'+str(i) in request.POST.keys():
+                    partido = Partido.objects.get(jornada=jornada, casilla=i)
+                    partido.signo = request.POST.get('signo-'+str(i))
+                    partido.save()
             return redirect(principal)
     return render_to_response('core/resultados.html',
-            {'jornada':jornada, 'partidos':partidos, 'premios_formset':premios_formset, 'premio':premio},
+            {'jornada':jornada, 'partidos':partidos,
+                'premios_formset':premios_formset, 'pagador_form':pagador_form},
             context_instance=RequestContext(request))
 
 def generar_apuestas(lista):
@@ -276,7 +284,8 @@ def insertar_posiciones(lista, jornada):
     anterior. La entrada es una lista que contiene los usuarios, sus
     aciertos, sus dobles, si tiene el pleno y sus posiciones anteriores.
     '''
-    lista = sorted(lista, key=lambda entrada: entrada.get('numero_aciertos'), reverse=True)
+    lista = sorted(lista, key=lambda entrada: entrada.get('numero_aciertos'),
+            reverse=True)
     cont_posicion = 0
     while len(lista) > 0:
         entrada = lista[0]
@@ -293,19 +302,23 @@ def insertar_posiciones(lista, jornada):
                         otro_posicion_anterior = otro.get('posicion_anterior')
                         if posicion_anterior > otro_posicion_anterior:
                             cont_posicion += 1
-                            insertar_posicion(entrada.get('usuario'), jornada, cont_posicion)
+                            insertar_posicion(entrada.get('usuario'), jornada,
+                                    cont_posicion)
                             lista.remove(entrada)
                 else:
                     cont_posicion += 1
-                    insertar_posicion(lista_dobles[0].get('usuario'), jornada, cont_posicion)
+                    insertar_posicion(lista_dobles[0].get('usuario'), jornada,
+                            cont_posicion)
                     lista.remove(lista_dobles[0])
             else:
                 cont_posicion += 1
-                insertar_posicion(lista_plenos[0].get('usuario'), jornada, cont_posicion)
+                insertar_posicion(lista_plenos[0].get('usuario'), jornada,
+                        cont_posicion)
                 lista.remove(lista_plenos[0])
         else:
             cont_posicion += 1
-            insertar_posicion(lista_usuarios[0].get('usuario'), jornada, cont_posicion)
+            insertar_posicion(lista_usuarios[0].get('usuario'), jornada,
+                    cont_posicion)
             lista.remove(lista_usuarios[0])
 
 def obtener_aciertos(apuesta, resultado):

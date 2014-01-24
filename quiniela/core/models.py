@@ -80,7 +80,7 @@ class Jornada (models.Model):
 class Apuesta (models.Model):
     jornada = models.ForeignKey(Jornada)
     usuario = models.ForeignKey(User)
-    numero = models.PositiveSmallIntegerField(help_text='Número de apuesta.', 
+    numero = models.PositiveSmallIntegerField(help_text='Número de apuesta.',
             verbose_name = 'Número')
 
     class Meta:
@@ -153,3 +153,11 @@ class Premio (models.Model):
 
     class Meta:
         unique_together = (('jornada', 'categoria'),)
+
+
+class Pagador (models.Model):
+    usuario = models.OneToOneField(User)
+    jornada = models.OneToOneField(Jornada)
+
+    class Meta:
+        unique_together = (('usuario', 'jornada'),)

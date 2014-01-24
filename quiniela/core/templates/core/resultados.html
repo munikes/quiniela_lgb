@@ -21,6 +21,10 @@
    {{ categoria }}{{ cantidad }}<br/>
   {% endfor %}
   </p>
+  <p>Pagador:</p>
+  <p>
+    {{ pagador_form.as_p }}
+  </p>
   <input type="submit" value="Submit" />
 </form>
 <a href="/logout/">Logout</a>

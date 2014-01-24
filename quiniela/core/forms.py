@@ -24,7 +24,7 @@ from django.forms import (ModelForm, CharField, HiddenInput, MultipleChoiceField
                         CheckboxSelectMultiple, ValidationError)
 from django.forms.formsets import BaseFormSet
 
-from quiniela.core.models import Partido, Jornada, Resultado, Premio
+from quiniela.core.models import Partido, Jornada, Resultado, Premio, Pagador
 
 
 class JornadaForm(ModelForm):
@@ -80,3 +80,10 @@ class PremioForm(ModelForm):
     class Meta:
         model = Premio
         fields = ('categoria', 'cantidad',)
+
+
+class PagadorForm(ModelForm):
+    jornada = CharField(widget=HiddenInput())
+
+    class Meta:
+        model = Pagador
