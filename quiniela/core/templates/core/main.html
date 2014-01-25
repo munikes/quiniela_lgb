@@ -67,6 +67,13 @@
     </td>
     {% endfor %}
   </tr>
+  <tr><td>Mi Bolsa </td>
+    {% for elemento in respuesta %}
+      {% if elemento.usuario == user %}
+      <td colspan="{{ respuesta|length }}">{{ elemento.acumulado_user }} €</td>
+      {% endif %}
+    {% endfor %}
+  </tr>
 </table>
 {% endif %}
   {% if user.is_staff %}

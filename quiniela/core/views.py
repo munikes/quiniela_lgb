@@ -31,6 +31,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
+from django.db.models import Sum
 
 @login_required
 def principal(request, template_name = 'core/main.html'):
@@ -97,7 +98,7 @@ def principal(request, template_name = 'core/main.html'):
                     bolsa.premio = premio
                     bolsa.usuario = usuario
                     if posicion_anterior > len(usuarios)/2:
-                        bolsa.coste = bolsa.coste + 16
+                        bolsa.coste = 16
                     else:
                         if not bolsa.coste:
                             bolsa.coste = 8
@@ -105,9 +106,18 @@ def principal(request, template_name = 'core/main.html'):
                         bolsa.coste = bolsa.coste - 64
                     bolsa.jornada = jornada
                     bolsa.save()
+                else:
+                    bolsa = Bolsa.objects.get(jornada=jornada, usuario=usuario)
                 total_premio += premio
             else:
                 premio = 0
+                try:
+                    bolsa = Bolsa.objects.get(jornada=jornada.anterior, usuario=usuario)
+                except Bolsa.DoesNotExist:
+                    bolsa = ''
+            premios_user = Bolsa.objects.filter(usuario=usuario).aggregate(Sum('premio'))
+            costes_user = Bolsa.objects.filter(usuario=usuario).aggregate(Sum('coste'))
+            acumulado_user = premios_user.get('premio__sum') + costes_user.get('coste__sum')
             entrada = {'usuario':usuario, 'aciertos_10':lista_aciertos.count(10),
                 'aciertos_11':lista_aciertos.count(11),
                 'aciertos_12':lista_aciertos.count(12),
@@ -120,11 +130,14 @@ def principal(request, template_name = 'core/main.html'):
                 'pleno':cont_pleno,
                 'apuesta':crear_lista_apuestas(matriz_resultados),
                 'premio':premio,
-                'posicion_anterior':posicion_anterior
+                'posicion_anterior':posicion_anterior,
+                'bolsa':bolsa,
+                'acumulado_user':acumulado_user,
                 }
             respuesta.append(entrada)
         # inserto posiciones
-        if partidos.values('signo') and not Posicion.objects.filter(jornada=jornada):
+        if (Partido.objects.filter(jornada=jornada).exclude(signo__exact='')
+                and not Posicion.objects.filter(jornada=jornada)):
             insertar_posiciones(respuesta, jornada)
         posiciones = Posicion.objects.filter(jornada=jornada)
         for entrada in respuesta:
