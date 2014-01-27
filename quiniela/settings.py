@@ -1,4 +1,6 @@
 # Django settings for quiniela project.
+import os
+import urlparse
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -9,14 +11,16 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+url = urlparse.urlparse(os.environ.get('OPENSHIFT_MYSQL_DB_URL'))
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'quiniela',                      # Or path to database file if using sqlite3.
-        'USER': 'quiniela',                      # Not used with sqlite3.
-        'PASSWORD': 'quiniela',                  # Not used with sqlite3.
-        'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'NAME': os.environ['OPENSHIFT_APP_NAME'],# Or path to database file if using sqlite3.
+        'USER': url.username,                    # Not used with sqlite3.
+        'PASSWORD': url.passwrod,                # Not used with sqlite3.
+        'HOST': url.hostname,                    # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': url.port,                      # Set to empty string for default. Not used with sqlite3.
     }
 }
 
