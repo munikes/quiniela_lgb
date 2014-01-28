@@ -117,7 +117,10 @@ def principal(request, template_name = 'core/main.html'):
                     bolsa = ''
             premios_user = Bolsa.objects.filter(usuario=usuario).aggregate(Sum('premio'))
             costes_user = Bolsa.objects.filter(usuario=usuario).aggregate(Sum('coste'))
-            acumulado_user = premios_user.get('premio__sum') + costes_user.get('coste__sum')
+            if premios_user.get('premio__sum') and costes_user.get('coste__sum'):
+                acumulado_user = premios_user.get('premio__sum') + costes_user.get('coste__sum')
+            else:
+                acumulado_user = 0
             entrada = {'usuario':usuario, 'aciertos_10':lista_aciertos.count(10),
                 'aciertos_11':lista_aciertos.count(11),
                 'aciertos_12':lista_aciertos.count(12),
