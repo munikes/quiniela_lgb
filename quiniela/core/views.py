@@ -34,12 +34,15 @@ from django.shortcuts import redirect
 from django.db.models import Sum
 
 @login_required
-def principal(request, template_name = 'core/main.html'):
+def principal(request, template_name='core/main.html', jornada=None):
     usuarios = []
     respuesta = []
     total_premio = 0
     try:
-        jornada = Jornada.objects.latest('jornada')
+        if jornada:
+            jornada = Jornada.objects.get(numero=jornada)
+        else:
+            jornada = Jornada.objects.latest('jornada')
         partidos = Partido.objects.filter(jornada=jornada)
         apuestas = Apuesta.objects.filter(jornada=jornada)
         for apuesta in apuestas:
