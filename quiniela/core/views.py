@@ -117,8 +117,10 @@ def principal(request, template_name = 'core/main.html'):
                     bolsa = ''
             premios_user = Bolsa.objects.filter(usuario=usuario).aggregate(Sum('premio'))
             costes_user = Bolsa.objects.filter(usuario=usuario).aggregate(Sum('coste'))
-            if premios_user.get('premio__sum') and costes_user.get('coste__sum'):
-                acumulado_user = premios_user.get('premio__sum') + costes_user.get('coste__sum')
+            if (premios_user.get('premio__sum') != None and
+                costes_user.get('coste__sum') != None):
+                acumulado_user = (premios_user.get('premio__sum') +
+                        costes_user.get('coste__sum'))
             else:
                 acumulado_user = 0
             entrada = {'usuario':usuario, 'aciertos_10':lista_aciertos.count(10),
@@ -300,42 +302,17 @@ def insertar_posiciones(lista, jornada):
     anterior. La entrada es una lista que contiene los usuarios, sus
     aciertos, sus dobles, si tiene el pleno y sus posiciones anteriores.
     '''
-    lista = sorted(lista, key=lambda entrada: entrada.get('numero_aciertos'),
+    lista = sorted(lista, key=lambda entrada: (entrada.get('numero_aciertos'),
+        entrada.get('pleno'),
+        entrada.get('dobles_aciertos'),
+        -entrada.get('posicion_anterior')),
             reverse=True)
-    cont_posicion = 0
-    while len(lista) > 0:
-        entrada = lista[0]
-        numero_aciertos = entrada.get('numero_aciertos')
-        lista_usuarios = [i for i in lista if i['numero_aciertos'] == numero_aciertos]
-        if len(lista_usuarios) != 1:
-            lista_plenos = [i for i in  lista_usuarios if i['pleno'] == 1]
-            if len(lista_plenos) != 1:
-                numero_dobles = entrada.get('dobles_aciertos')
-                lista_dobles = [i for i in  lista_plenos if i['dobles_aciertos'] == numero_dobles]
-                if len(lista_dobles) != 1:
-                    posicion_anterior = entrada.get('posicion_anterior')
-                    for otro in lista_dobles:
-                        otro_posicion_anterior = otro.get('posicion_anterior')
-                        if posicion_anterior > otro_posicion_anterior:
-                            cont_posicion += 1
-                            insertar_posicion(entrada.get('usuario'), jornada,
-                                    cont_posicion)
-                            lista.remove(entrada)
-                else:
-                    cont_posicion += 1
-                    insertar_posicion(lista_dobles[0].get('usuario'), jornada,
-                            cont_posicion)
-                    lista.remove(lista_dobles[0])
-            else:
-                cont_posicion += 1
-                insertar_posicion(lista_plenos[0].get('usuario'), jornada,
-                        cont_posicion)
-                lista.remove(lista_plenos[0])
-        else:
-            cont_posicion += 1
-            insertar_posicion(lista_usuarios[0].get('usuario'), jornada,
-                    cont_posicion)
-            lista.remove(lista_usuarios[0])
+    for position, item in enumerate(lista):
+        posicion = Posicion()
+        posicion.usuario = item.get('usuario')
+        posicion.jornada = jornada
+        posicion.posicion = position + 1
+        posicion.save()
 
 def obtener_aciertos(apuesta, resultado):
     aciertos = 0
@@ -346,10 +323,3 @@ def obtener_aciertos(apuesta, resultado):
         if apuesta[len(apuesta)-1] == resultado[len(apuesta)-1]:
             aciertos += 1
     return aciertos
-
-def insertar_posicion(usuario, jornada, puesto):
-    posicion = Posicion()
-    posicion.usuario = usuario
-    posicion.jornada = jornada
-    posicion.posicion = puesto
-    posicion.save()
