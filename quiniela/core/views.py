@@ -174,6 +174,7 @@ def crear_jornada(request, template_name = 'core/partidos.html'):
             jornada = jornada_form.save(commit=False)
             try:
                 jornada.anterior = Jornada.objects.latest('jornada')
+                jornada.save()
             except Jornada.DoesNotExist:
                 jornada.save()
             for form in partidos_formset:
