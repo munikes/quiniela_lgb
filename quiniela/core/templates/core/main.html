@@ -76,7 +76,7 @@
   </tr>
 </table>
 {% endif %}
-  {% if jornada.anterior %}<a href="/main/{{ jornada.anterior }}">Jornada anterior</a>{% endif %}
+  {% if jornada.anterior %}<a href="/main/{{ jornada.anterior.numero }}">Jornada anterior</a>{% endif %}
   {% if user.is_staff %}
   <a href="{% url "crear_jornada" %}">Nueva Jornada</a>
   {% if not user in usuarios %}<a href="{% url "crear_apuesta" %}">Nueva Apuesta</a>{% endif %}
