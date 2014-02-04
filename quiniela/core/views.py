@@ -46,7 +46,7 @@ def principal(request, template_name='core/main.html', jornada=None):
         jornada_page = paginator.page(page)
     except PageNotAnInteger:
         # If page is not an integer, deliver first page.
-        jornada_page = paginator.page(1)
+        jornada_page = paginator.page(paginator.num_pages)
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
         jornada_page = paginator.page(paginator.num_pages)
