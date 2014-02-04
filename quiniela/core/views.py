@@ -32,134 +32,139 @@ from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.db.models import Sum
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 @login_required
 def principal(request, template_name='core/main.html', jornada=None):
     usuarios = []
     respuesta = []
     total_premio = 0
+    jornada_list = Jornada.objects.all()
+    paginator = Paginator(jornada_list, 1)
+    page = request.GET.get('page')
     try:
-        if jornada:
-            jornada = Jornada.objects.get(numero=jornada)
-        else:
-            jornada = Jornada.objects.latest('numero')
-        partidos = Partido.objects.filter(jornada=jornada)
-        apuestas = Apuesta.objects.filter(jornada=jornada)
+        jornada_page = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        jornada_page = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        jornada_page = paginator.page(paginator.num_pages)
+    jornada = jornada_page.object_list[0]
+    partidos = Partido.objects.filter(jornada=jornada)
+    apuestas = Apuesta.objects.filter(jornada=jornada)
+    for apuesta in apuestas:
+        usuario = apuesta.usuario
+        if not usuario in usuarios:
+            usuarios.append(usuario)
+    for usuario in usuarios:
+        matriz_resultados = []
+        lista_aciertos = []
+        cont_aciertos = 0
+        cont_dobles = 0
+        cont_pleno = 0
+        apuestas = Apuesta.objects.filter(jornada=jornada, usuario=usuario)
         for apuesta in apuestas:
-            usuario = apuesta.usuario
-            if not usuario in usuarios:
-                usuarios.append(usuario)
-        for usuario in usuarios:
-            matriz_resultados = []
-            lista_aciertos = []
-            cont_aciertos = 0
-            cont_dobles = 0
-            cont_pleno = 0
-            apuestas = Apuesta.objects.filter(jornada=jornada, usuario=usuario)
-            for apuesta in apuestas:
-                resultados = Resultado.objects.filter(apuesta=apuesta).values('signo')
-                matriz_resultados.append(resultados)
-                if partidos.values('signo'):
-                    aciertos = obtener_aciertos(resultados, partidos.values('signo'))
-                    if aciertos >= 10:
-                        lista_aciertos.append(aciertos)
+            resultados = Resultado.objects.filter(apuesta=apuesta).values('signo')
+            matriz_resultados.append(resultados)
             if partidos.values('signo'):
-                # calcular aciertos dobles y pleno
-                apuesta =  crear_lista_apuestas(matriz_resultados)
-                cont = 0
-                for signo in apuesta:
-                    for i in signo:
-                        if (partidos[cont].signo == i.get('signo') and
-                            len(signo) != 1):
-                            cont_dobles += 1
-                            cont_aciertos += 1
-                        elif (partidos[cont].signo == i.get('signo') and
-                            cont == len(partidos)-1):
-                            cont_pleno = 1
-                        elif partidos[cont].signo == i.get('signo'):
-                            cont_aciertos += 1
-                    cont += 1
-            # obtengo la posicion_anterior
-            try :
-                posicion_anterior = Posicion.objects.get(usuario=usuario,
-                        jornada=jornada.anterior)
-            except Posicion.DoesNotExist:
-                posicion_anterior = 1
-            # calculo del premio
-            premios = Premio.objects.filter(jornada=jornada)
-            if premios:
-                premio = (Premio.objects.get(jornada=jornada, categoria=10).cantidad * lista_aciertos.count(10) +
-                Premio.objects.get(jornada=jornada, categoria=11).cantidad * lista_aciertos.count(11) +
-                Premio.objects.get(jornada=jornada, categoria=12).cantidad * lista_aciertos.count(12) +
-                Premio.objects.get(jornada=jornada, categoria=13).cantidad * lista_aciertos.count(13) +
-                Premio.objects.get(jornada=jornada, categoria=14).cantidad * lista_aciertos.count(14) +
-                Premio.objects.get(jornada=jornada, categoria=15).cantidad * lista_aciertos.count(15))
-                # inserto la bolsa del usuario
-                pagador = Pagador.objects.get(jornada=jornada)
-                if not Bolsa.objects.filter(jornada=jornada, usuario=usuario):
-                    bolsa = Bolsa()
-                    bolsa.premio = premio
-                    bolsa.usuario = usuario
-                    if posicion_anterior > len(usuarios)/2:
-                        bolsa.coste = 16
-                    else:
-                        if not bolsa.coste:
-                            bolsa.coste = 8
-                    if pagador.usuario == bolsa.usuario:
-                        bolsa.coste = bolsa.coste - 64
-                    bolsa.jornada = jornada
-                    bolsa.save()
+                aciertos = obtener_aciertos(resultados, partidos.values('signo'))
+                if aciertos >= 10:
+                    lista_aciertos.append(aciertos)
+        if partidos.values('signo'):
+            # calcular aciertos dobles y pleno
+            apuesta =  crear_lista_apuestas(matriz_resultados)
+            cont = 0
+            for signo in apuesta:
+                for i in signo:
+                    if (partidos[cont].signo == i.get('signo') and
+                        len(signo) != 1):
+                        cont_dobles += 1
+                        cont_aciertos += 1
+                    elif (partidos[cont].signo == i.get('signo') and
+                        cont == len(partidos)-1):
+                        cont_pleno = 1
+                    elif partidos[cont].signo == i.get('signo'):
+                        cont_aciertos += 1
+                cont += 1
+        # obtengo la posicion_anterior
+        try :
+            posicion_anterior = Posicion.objects.get(usuario=usuario,
+                    jornada=jornada.anterior)
+        except Posicion.DoesNotExist:
+            posicion_anterior = 1
+        # calculo del premio
+        premios = Premio.objects.filter(jornada=jornada)
+        if premios:
+            premio = (Premio.objects.get(jornada=jornada, categoria=10).cantidad * lista_aciertos.count(10) +
+            Premio.objects.get(jornada=jornada, categoria=11).cantidad * lista_aciertos.count(11) +
+            Premio.objects.get(jornada=jornada, categoria=12).cantidad * lista_aciertos.count(12) +
+            Premio.objects.get(jornada=jornada, categoria=13).cantidad * lista_aciertos.count(13) +
+            Premio.objects.get(jornada=jornada, categoria=14).cantidad * lista_aciertos.count(14) +
+            Premio.objects.get(jornada=jornada, categoria=15).cantidad * lista_aciertos.count(15))
+            # inserto la bolsa del usuario
+            pagador = Pagador.objects.get(jornada=jornada)
+            if not Bolsa.objects.filter(jornada=jornada, usuario=usuario):
+                bolsa = Bolsa()
+                bolsa.premio = premio
+                bolsa.usuario = usuario
+                if posicion_anterior > len(usuarios)/2:
+                    bolsa.coste = 16
                 else:
-                    bolsa = Bolsa.objects.get(jornada=jornada, usuario=usuario)
-                total_premio += premio
+                    if not bolsa.coste:
+                        bolsa.coste = 8
+                if pagador.usuario == bolsa.usuario:
+                    bolsa.coste = bolsa.coste - 64
+                bolsa.jornada = jornada
+                bolsa.save()
             else:
-                premio = 0
-                try:
-                    bolsa = Bolsa.objects.get(jornada=jornada.anterior, usuario=usuario)
-                except Bolsa.DoesNotExist:
-                    bolsa = ''
-            premios_user = Bolsa.objects.filter(usuario=usuario).aggregate(Sum('premio'))
-            costes_user = Bolsa.objects.filter(usuario=usuario).aggregate(Sum('coste'))
-            if (premios_user.get('premio__sum') != None and
-                costes_user.get('coste__sum') != None):
-                acumulado_user = (premios_user.get('premio__sum') +
-                        costes_user.get('coste__sum'))
-            else:
-                acumulado_user = 0
-            entrada = {'usuario':usuario, 'aciertos_10':lista_aciertos.count(10),
-                'aciertos_11':lista_aciertos.count(11),
-                'aciertos_12':lista_aciertos.count(12),
-                'aciertos_13':lista_aciertos.count(13),
-                'aciertos_14':lista_aciertos.count(14),
-                'aciertos_15':lista_aciertos.count(15),
-                'aciertos':lista_aciertos,
-                'numero_aciertos':cont_aciertos,
-                'dobles_aciertos':cont_dobles,
-                'pleno':cont_pleno,
-                'apuesta':crear_lista_apuestas(matriz_resultados),
-                'premio':premio,
-                'posicion_anterior':posicion_anterior,
-                'bolsa':bolsa,
-                'acumulado_user':acumulado_user,
-                }
-            respuesta.append(entrada)
-        # inserto posiciones
-        if (Partido.objects.filter(jornada=jornada).exclude(signo__exact='')
-                and not Posicion.objects.filter(jornada=jornada)):
-            insertar_posiciones(respuesta, jornada)
-        posiciones = Posicion.objects.filter(jornada=jornada)
-        for entrada in respuesta:
-            for posicion in posiciones:
-                if entrada.get('usuario') == posicion.usuario:
-                    entrada['posicion'] = posicion
-                    break
-        return render_to_response('core/main.html', {'usuarios':usuarios,
-            'jornada':jornada,'respuesta':respuesta, 'partidos':partidos,
-            'total_premio':total_premio,'posiciones':posiciones},
-                context_instance=RequestContext (request))
-    except Jornada.DoesNotExist:
-        return render_to_response('core/main.html', {},
-                context_instance=RequestContext (request))
+                bolsa = Bolsa.objects.get(jornada=jornada, usuario=usuario)
+            total_premio += premio
+        else:
+            premio = 0
+            try:
+                bolsa = Bolsa.objects.get(jornada=jornada.anterior, usuario=usuario)
+            except Bolsa.DoesNotExist:
+                bolsa = ''
+        premios_user = Bolsa.objects.filter(usuario=usuario).aggregate(Sum('premio'))
+        costes_user = Bolsa.objects.filter(usuario=usuario).aggregate(Sum('coste'))
+        if (premios_user.get('premio__sum') != None and
+            costes_user.get('coste__sum') != None):
+            acumulado_user = (premios_user.get('premio__sum') +
+                    costes_user.get('coste__sum'))
+        else:
+            acumulado_user = 0
+        entrada = {'usuario':usuario, 'aciertos_10':lista_aciertos.count(10),
+            'aciertos_11':lista_aciertos.count(11),
+            'aciertos_12':lista_aciertos.count(12),
+            'aciertos_13':lista_aciertos.count(13),
+            'aciertos_14':lista_aciertos.count(14),
+            'aciertos_15':lista_aciertos.count(15),
+            'aciertos':lista_aciertos,
+            'numero_aciertos':cont_aciertos,
+            'dobles_aciertos':cont_dobles,
+            'pleno':cont_pleno,
+            'apuesta':crear_lista_apuestas(matriz_resultados),
+            'premio':premio,
+            'posicion_anterior':posicion_anterior,
+            'bolsa':bolsa,
+            'acumulado_user':acumulado_user,
+            }
+        respuesta.append(entrada)
+    # inserto posiciones
+    if (Partido.objects.filter(jornada=jornada).exclude(signo__exact='')
+            and not Posicion.objects.filter(jornada=jornada)):
+        insertar_posiciones(respuesta, jornada)
+    posiciones = Posicion.objects.filter(jornada=jornada)
+    for entrada in respuesta:
+        for posicion in posiciones:
+            if entrada.get('usuario') == posicion.usuario:
+                entrada['posicion'] = posicion
+                break
+    return render_to_response('core/main.html', {'usuarios':usuarios,
+        'jornada':jornada,'respuesta':respuesta, 'partidos':partidos,
+        'total_premio':total_premio,'posiciones':posiciones, 'jornada_page':jornada_page},
+            context_instance=RequestContext (request))
 
 @login_required
 def crear_jornada(request, template_name = 'core/partidos.html'):

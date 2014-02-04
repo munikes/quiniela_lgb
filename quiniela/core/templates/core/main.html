@@ -32,7 +32,7 @@
     </td>
   </tr>
   <tr>
-    <td>Aciertos</td>
+    <td>Reducciones</td>
     {% for elemento in respuesta %}
     <td>
       15: {{ elemento.aciertos_15 }}<br/>
@@ -56,6 +56,15 @@
     </td>
   </tr>
   <tr>
+    <td>Aciertos</td>
+    {% for elemento in respuesta %}
+    <td>
+      {{ elemento.numero_aciertos }}+{{ elemento.dobles_aciertos }}
+      {% if elemento.pleno == 1 %} y pleno{% endif %}
+    </td>
+    {% endfor %}
+  </tr>
+  <tr>
     <td>Posici&oacute;n</td>
     {% for elemento in respuesta %}
     <td>
@@ -76,7 +85,6 @@
   </tr>
 </table>
 {% endif %}
-  {% if jornada.anterior %}<a href="/main/{{ jornada.anterior.numero }}">Jornada anterior</a>{% endif %}
   {% if user.is_staff %}
   <a href="{% url "crear_jornada" %}">Nueva Jornada</a>
   {% if not user in usuarios %}<a href="{% url "crear_apuesta" %}">Nueva Apuesta</a>{% endif %}
@@ -84,6 +92,15 @@
   {% elif user.is_active %}
   {% if not user in usuarios %}<a href="{% url "crear_apuesta" %}">Nueva Apuesta</a>{% endif %}
   {% endif %}
+  <br/>
+  {% if jornada_page.has_previous %}
+    <a href="?page={{ jornada_page.previous_page_number }}">Anterior</a>
+  {% endif %}
+    Jornada {{ jornada_page.number }} de {{ jornada_page.paginator.num_pages }}.
+  {% if jornada_page.has_next %}
+    <a href="?page={{ jornada_page.next_page_number }}">Siguiente</a>
+  {% endif %}
+  <br/>
   <a href="/logout/">Logout</a>
 {% else %}
 <a href="/">Login</a>

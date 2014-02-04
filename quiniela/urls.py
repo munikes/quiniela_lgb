@@ -13,8 +13,6 @@ urlpatterns = patterns('',
     url(r'^new_resultado/$', views.crear_resultado, name='crear_resultado'),
     url(r'^$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
     url(r'^logout/$', 'django.contrib.auth.views.logout', {'template_name': 'logout.html'}),
-    url(r'^main/(?P<jornada>\d+)$',views.principal, name='principal'),
-    # url(r'^quiniela/', include('quiniela.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
