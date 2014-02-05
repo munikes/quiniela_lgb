@@ -52,7 +52,7 @@ def principal(request, template_name='core/main.html', jornada=None):
         jornada_page = paginator.page(paginator.num_pages)
     jornada = jornada_page.object_list[0]
     partidos = Partido.objects.filter(jornada=jornada)
-    apuestas = Apuesta.objects.filter(jornada=jornada)
+    apuestas = Apuesta.objects.filter(jornada=jornada).order_by('id')
     for apuesta in apuestas:
         usuario = apuesta.usuario
         if not usuario in usuarios:
