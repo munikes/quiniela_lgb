@@ -9,8 +9,8 @@ urlpatterns = patterns('',
 
     url(r'^main/$', views.principal, name='principal'),
     url(r'^new_jornada/$', views.crear_jornada, name='crear_jornada'),
-    url(r'^new_apuesta/$', views.crear_apuesta, name='crear_apuesta'),
-    url(r'^new_resultado/$', views.crear_resultado, name='crear_resultado'),
+    url(r'^new_apuesta/(?P<jornada>\d+)$', views.crear_apuesta, name='crear_apuesta'),
+    url(r'^new_resultado/(?P<jornada>\d+)$', views.crear_resultado, name='crear_resultado'),
     url(r'^$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
     url(r'^logout/$', 'django.contrib.auth.views.logout', {'template_name': 'logout.html'}),
 

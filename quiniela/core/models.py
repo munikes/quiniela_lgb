@@ -105,7 +105,7 @@ class Partido (models.Model):
 
 
 class Bolsa (models.Model):
-    usuario = models.OneToOneField(User)
+    usuario = models.ForeignKey(User)
     jornada = models.ForeignKey(Jornada)
     premio = models.DecimalField(verbose_name='Premio', max_digits=10,
             decimal_places=2, help_text='Cantidad de euros ganados.')
@@ -117,7 +117,7 @@ class Bolsa (models.Model):
 
 
 class Posicion (models.Model):
-    usuario = models.OneToOneField(User)
+    usuario = models.ForeignKey(User)
     jornada = models.ForeignKey(Jornada)
     posicion = models.PositiveSmallIntegerField(verbose_name='Posicion',
             help_text='Posición que ocupas.')
@@ -156,8 +156,8 @@ class Premio (models.Model):
 
 
 class Pagador (models.Model):
-    usuario = models.OneToOneField(User)
-    jornada = models.OneToOneField(Jornada)
+    usuario = models.ForeignKey(User)
+    jornada = models.ForeignKey(Jornada)
 
     class Meta:
         unique_together = (('usuario', 'jornada'),)

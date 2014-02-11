@@ -90,9 +90,9 @@ def principal(request, template_name='core/main.html', jornada=None):
         # obtengo la posicion_anterior
         try :
             posicion_anterior = Posicion.objects.get(usuario=usuario,
-                    jornada=jornada.anterior)
+                    jornada=jornada.anterior).posicion
         except Posicion.DoesNotExist:
-            posicion_anterior = 1
+            posicion_anterior = None
         # calculo del premio
         premios = Premio.objects.filter(jornada=jornada)
         if premios:
@@ -108,11 +108,13 @@ def principal(request, template_name='core/main.html', jornada=None):
                 bolsa = Bolsa()
                 bolsa.premio = premio
                 bolsa.usuario = usuario
-                if posicion_anterior > len(usuarios)/2:
+                print posicion_anterior
+                if posicion_anterior == None:
+                    bolsa.coste = 8
+                elif posicion_anterior > len(usuarios)/2:
                     bolsa.coste = 16
-                else:
-                    if not bolsa.coste:
-                        bolsa.coste = 8
+                elif posicion_anterior <= len(usuarios)/2:
+                    bolsa.coste = 0
                 if pagador.usuario == bolsa.usuario:
                     bolsa.coste = bolsa.coste - 64
                 bolsa.jornada = jornada
@@ -152,7 +154,7 @@ def principal(request, template_name='core/main.html', jornada=None):
             }
         respuesta.append(entrada)
     # inserto posiciones
-    if (Partido.objects.filter(jornada=jornada).exclude(signo__exact='')
+    if (not Partido.objects.filter(jornada=jornada, signo__exact='')
             and not Posicion.objects.filter(jornada=jornada)):
         insertar_posiciones(respuesta, jornada)
     posiciones = Posicion.objects.filter(jornada=jornada)
@@ -163,8 +165,8 @@ def principal(request, template_name='core/main.html', jornada=None):
                 break
     return render_to_response('core/main.html', {'usuarios':usuarios,
         'jornada':jornada,'respuesta':respuesta, 'partidos':partidos,
-        'total_premio':total_premio,'posiciones':posiciones, 'jornada_page':jornada_page},
-            context_instance=RequestContext (request))
+        'total_premio':total_premio,'posiciones':posiciones,'premios':premios,
+        'jornada_page':jornada_page}, context_instance=RequestContext (request))
 
 @login_required
 def crear_jornada(request, template_name = 'core/partidos.html'):
@@ -194,10 +196,10 @@ def crear_jornada(request, template_name = 'core/partidos.html'):
             context_instance=RequestContext(request))
 
 @login_required
-def crear_apuesta(request, template_name = 'core/apuesta.html'):
+def crear_apuesta(request, template_name = 'core/apuesta.html', jornada=None):
     x = 0
     lista_resultados = []
-    jornada = Jornada.objects.latest('numero')
+    jornada = Jornada.objects.get(numero=jornada)
     partidos = Partido.objects.filter(jornada=jornada)
     ResultadosFormSet = formset_factory(ResultadoForm, extra=15, max_num=15,
             validate_max=True, formset=BaseResultadosFormSet)
@@ -232,8 +234,8 @@ def crear_apuesta(request, template_name = 'core/apuesta.html'):
             context_instance=RequestContext(request))
 
 @login_required
-def crear_resultado(request, template_name = 'core/resultados.html'):
-    jornada = Jornada.objects.latest('numero')
+def crear_resultado(request, template_name = 'core/resultados.html', jornada=None):
+    jornada = Jornada.objects.get(numero=jornada)
     partidos = Partido.objects.filter(jornada=jornada)
     PremiosFormSet = formset_factory(PremioForm, extra=6)
     premios_formset = PremiosFormSet()
@@ -246,13 +248,15 @@ def crear_resultado(request, template_name = 'core/resultados.html'):
                 premio = form.save(commit=False)
                 premio.jornada = jornada
                 premio.save()
-            pagador_form.save()
-            for i in range(1, 16):
-                if 'signo-'+str(i) in request.POST.keys():
-                    partido = Partido.objects.get(jornada=jornada, casilla=i)
-                    partido.signo = request.POST.get('signo-'+str(i))
-                    partido.save()
-            return redirect(principal)
+            pagador = pagador_form.save(commit=False)
+            pagador.jornada = jornada
+            pagador.save()
+        for i in range(1, 16):
+            if 'signo-'+str(i) in request.POST.keys():
+                partido = Partido.objects.get(jornada=jornada, casilla=i)
+                partido.signo = request.POST.get('signo-'+str(i))
+                partido.save()
+        return redirect(principal)
     return render_to_response('core/resultados.html',
             {'jornada':jornada, 'partidos':partidos,
                 'premios_formset':premios_formset, 'pagador_form':pagador_form},

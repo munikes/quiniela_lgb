@@ -1,5 +1,5 @@
 {% if user.is_authenticated %}
-<form method="post" action=".">{% csrf_token %}
+<form method="post" action="">{% csrf_token %}
 {{ premios_formset.management_form }}
   {{ premios_formset.non_form_errors }}
   <h1>Resultados:</h1>
@@ -7,11 +7,9 @@
   <p align="justify">
   {% for partido in partidos  %}
   {{ partido.casilla }} {{ partido.local }} - {{ partido.visitante }}
-  <select name="signo-{{ partido.casilla }}">
-    <option value="1">1</option>
-    <option value="X" {% if partido.signo|stringformat:'s' == 'X' %}selected{% endif %}>X</option>
-    <option value="2" {% if partido.signo|stringformat:'s' == '2' %}selected{% endif %}>2</option>
-  </select><br/>
+  1<input type="radio" name="signo-{{ partido.casilla }}" value="1" {% if partido.signo|stringformat:'s' == '1' %}checked{% endif %}/>
+  X<input type="radio" name="signo-{{ partido.casilla }}" value="X" {% if partido.signo|stringformat:'s' == 'X' %}checked{% endif %}/>
+  2<input type="radio" name="signo-{{ partido.casilla }}" value="2" {% if partido.signo|stringformat:'s' == '2' %}checked{% endif %}/><br/>
   {% endfor %}
   </p>
   <p>Premios:</p>

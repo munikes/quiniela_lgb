@@ -83,7 +83,7 @@ class PremioForm(ModelForm):
 
 
 class PagadorForm(ModelForm):
-    jornada = CharField(widget=HiddenInput())
 
     class Meta:
         model = Pagador
+        fields = ('usuario',)
