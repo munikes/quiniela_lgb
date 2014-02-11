@@ -70,6 +70,7 @@ EQUIPOS = (
         ('Sporting', 'Sporting'),
         ('Tenerife', 'Tenerife'),
         ('Zaragoza', 'Zaragoza'),
+        ('Mirandes', 'Mirandés'),
         )
 class Jornada (models.Model):
     numero = models.PositiveSmallIntegerField(primary_key=True,

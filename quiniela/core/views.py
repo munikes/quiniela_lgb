@@ -38,6 +38,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 def principal(request, template_name='core/main.html', jornada=None):
     usuarios = []
     respuesta = []
+    premios = []
     total_premio = 0
     jornada_list = Jornada.objects.all()
     paginator = Paginator(jornada_list, 1)
@@ -92,7 +93,7 @@ def principal(request, template_name='core/main.html', jornada=None):
             posicion_anterior = Posicion.objects.get(usuario=usuario,
                     jornada=jornada.anterior).posicion
         except Posicion.DoesNotExist:
-            posicion_anterior = None
+            posicion_anterior = 0
         # calculo del premio
         premios = Premio.objects.filter(jornada=jornada)
         if premios:
@@ -108,12 +109,13 @@ def principal(request, template_name='core/main.html', jornada=None):
                 bolsa = Bolsa()
                 bolsa.premio = premio
                 bolsa.usuario = usuario
-                print posicion_anterior
-                if posicion_anterior == None:
+                if posicion_anterior == 0:
                     bolsa.coste = 8
+                    posicion_anterior = 0
                 elif posicion_anterior > len(usuarios)/2:
                     bolsa.coste = 16
-                elif posicion_anterior <= len(usuarios)/2:
+                elif (posicion_anterior <= len(usuarios)/2 
+                        and posicion_anterior != 0):
                     bolsa.coste = 0
                 if pagador.usuario == bolsa.usuario:
                     bolsa.coste = bolsa.coste - 64
