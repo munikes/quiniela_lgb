@@ -54,6 +54,7 @@ def principal(request, template_name='core/main.html', jornada=None):
     jornada = jornada_page.object_list[0]
     partidos = Partido.objects.filter(jornada=jornada)
     apuestas = Apuesta.objects.filter(jornada=jornada).order_by('id')
+    pagador = Pagador.objects.get(jornada=jornada)
     for apuesta in apuestas:
         usuario = apuesta.usuario
         if not usuario in usuarios:
@@ -104,7 +105,6 @@ def principal(request, template_name='core/main.html', jornada=None):
             Premio.objects.get(jornada=jornada, categoria=14).cantidad * lista_aciertos.count(14) +
             Premio.objects.get(jornada=jornada, categoria=15).cantidad * lista_aciertos.count(15))
             # inserto la bolsa del usuario
-            pagador = Pagador.objects.get(jornada=jornada)
             if not Bolsa.objects.filter(jornada=jornada, usuario=usuario):
                 bolsa = Bolsa()
                 bolsa.premio = premio
@@ -123,21 +123,13 @@ def principal(request, template_name='core/main.html', jornada=None):
                 bolsa.save()
             else:
                 bolsa = Bolsa.objects.get(jornada=jornada, usuario=usuario)
-            total_premio += premio
         else:
             premio = 0
             try:
                 bolsa = Bolsa.objects.get(jornada=jornada.anterior, usuario=usuario)
             except Bolsa.DoesNotExist:
                 bolsa = ''
-        premios_user = Bolsa.objects.filter(usuario=usuario).aggregate(Sum('premio'))
         costes_user = Bolsa.objects.filter(usuario=usuario).aggregate(Sum('coste'))
-        if (premios_user.get('premio__sum') != None and
-            costes_user.get('coste__sum') != None):
-            acumulado_user = (premios_user.get('premio__sum') +
-                    costes_user.get('coste__sum'))
-        else:
-            acumulado_user = 0
         entrada = {'usuario':usuario, 'aciertos_10':lista_aciertos.count(10),
             'aciertos_11':lista_aciertos.count(11),
             'aciertos_12':lista_aciertos.count(12),
@@ -152,7 +144,7 @@ def principal(request, template_name='core/main.html', jornada=None):
             'premio':premio,
             'posicion_anterior':posicion_anterior,
             'bolsa':bolsa,
-            'acumulado_user':acumulado_user,
+            'costes_user':costes_user.get('coste__sum'),
             }
         respuesta.append(entrada)
     # inserto posiciones
@@ -165,9 +157,14 @@ def principal(request, template_name='core/main.html', jornada=None):
             if entrada.get('usuario') == posicion.usuario:
                 entrada['posicion'] = posicion
                 break
+    total_premio = Bolsa.objects.filter(jornada=jornada).aggregate(Sum('premio'))
+    if total_premio.get('premio__sum') != 0:
+        bolsa = Bolsa.objects.get(usuario=pagador.usuario, jornada=jornada)
+        bolsa.coste = 16 - 64 + total_premio.get('premio__sum')
+        bolsa.save()
     return render_to_response('core/main.html', {'usuarios':usuarios,
         'jornada':jornada,'respuesta':respuesta, 'partidos':partidos,
-        'total_premio':total_premio,'posiciones':posiciones,'premios':premios,
+        'total_premio':total_premio.get('premio__sum'),'posiciones':posiciones,'premios':premios,
         'jornada_page':jornada_page}, context_instance=RequestContext (request))
 
 @login_required
@@ -182,7 +179,7 @@ def crear_jornada(request, template_name = 'core/partidos.html'):
         if jornada_form.is_valid() and partidos_formset.is_valid():
             jornada = jornada_form.save(commit=False)
             try:
-                jornada.anterior = Jornada.objects.latest('jornada')
+                jornada.anterior = Jornada.objects.latest('numero')
                 jornada.save()
             except Jornada.DoesNotExist:
                 jornada.save()

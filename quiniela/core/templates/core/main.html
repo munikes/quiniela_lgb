@@ -79,7 +79,7 @@
   <tr><td>Mi Bolsa </td>
     {% for elemento in respuesta %}
       {% if elemento.usuario == user %}
-      <td colspan="{{ respuesta|length }}">{{ elemento.acumulado_user }} €</td>
+      <td colspan="{{ respuesta|length }}">{{ elemento.costes_user }} €</td>
       {% endif %}
     {% endfor %}
   </tr>
