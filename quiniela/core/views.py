@@ -159,7 +159,7 @@ def principal(request, template_name='core/main.html', jornada=None):
                 entrada['posicion'] = posicion
                 break
     total_premio = Bolsa.objects.filter(jornada=jornada).aggregate(Sum('premio'))
-    if total_premio.get('premio__sum') != 0:
+    if total_premio.get('premio__sum'):
         bolsa = Bolsa.objects.get(usuario=pagador.usuario, jornada=jornada)
         bolsa.coste = 16 - 64 + total_premio.get('premio__sum')
         bolsa.save()
