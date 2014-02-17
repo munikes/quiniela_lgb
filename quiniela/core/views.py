@@ -54,7 +54,6 @@ def principal(request, template_name='core/main.html', jornada=None):
     jornada = jornada_page.object_list[0]
     partidos = Partido.objects.filter(jornada=jornada)
     apuestas = Apuesta.objects.filter(jornada=jornada).order_by('id')
-    pagador = Pagador.objects.get(jornada=jornada)
     for apuesta in apuestas:
         usuario = apuesta.usuario
         if not usuario in usuarios:
@@ -104,6 +103,8 @@ def principal(request, template_name='core/main.html', jornada=None):
             Premio.objects.get(jornada=jornada, categoria=13).cantidad * lista_aciertos.count(13) +
             Premio.objects.get(jornada=jornada, categoria=14).cantidad * lista_aciertos.count(14) +
             Premio.objects.get(jornada=jornada, categoria=15).cantidad * lista_aciertos.count(15))
+            # con los premios metemos a pagador
+            pagador = Pagador.objects.get(jornada=jornada)
             # inserto la bolsa del usuario
             if not Bolsa.objects.filter(jornada=jornada, usuario=usuario):
                 bolsa = Bolsa()
