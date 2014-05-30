@@ -26,6 +26,7 @@ from quiniela.core.models import (Apuesta, Partido, Jornada, Resultado, Premio,
 from quiniela.core.forms import (JornadaForm, PartidoForm, PremioForm,
                                 ResultadoForm, BaseResultadosFormSet,
                                 PagadorForm)
+from django.contrib.auth.models import User
 from django.forms.formsets import formset_factory
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -336,3 +337,42 @@ def obtener_aciertos(apuesta, resultado):
         if apuesta[len(apuesta)-1] == resultado[len(apuesta)-1]:
             aciertos += 1
     return aciertos
+
+@login_required
+def crear_grafico(request, template_name='core/graficos.html'):
+    users = User.objects.all()
+    jugadores_deuda = {}
+    jugadores_premio = {}
+    jugadores_posicion= {}
+    for user in users:
+        #suma_deuda = (Bolsa.objects.filter(usuario=user).aggregate(Sum('premio')) + Bolsa.objects.filter(usuario=user).aggregate(Sum('coste')))
+        deuda = Bolsa.objects.filter(usuario=user).aggregate(Sum('coste'))
+        jugadores_deuda[user.username] = float(deuda.get('coste__sum'))
+        premio = Bolsa.objects.filter(usuario=user).aggregate(Sum('premio'))
+        if float(premio.get('premio__sum')) > 0:
+            jugadores_premio[user.username] = float(premio.get('premio__sum'))
+    xdata = jugadores_deuda.keys()
+    ydata = jugadores_deuda.values()
+    extra_diagrama = {"tooltip": {"y_start": "€ ", "y_end": ""}}
+    chartdata = {'x': xdata, 'name1': 'costes', 'y1': ydata, 'extra1': extra_diagrama,}
+    charttype = "discreteBarChart"
+    chartcontainer = 'deuda_container'
+    data_deuda = {
+        'charttype': charttype,
+        'chartdata': chartdata,
+        'chartcontainer': chartcontainer,
+        'extra':{},
+    }
+    xdata = jugadores_premio.keys()
+    ydata = jugadores_premio.values()
+    extra_diagrama = {"tooltip": {"y_start": "€ ", "y_end": ""}}
+    chartdata = {'x': xdata, 'y1': ydata, 'extra1': extra_diagrama}
+    charttype = "pieChart"
+    chartcontainer = 'premio_container'
+    data_premio = {
+        'charttype': charttype,
+        'chartdata': chartdata,
+        'chartcontainer': chartcontainer,
+        'extra':{},
+    }
+    return render_to_response('core/graficos.html', {"data_deuda":data_deuda, "data_premio":data_premio}, context_instance=RequestContext(request))

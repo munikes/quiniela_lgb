@@ -89,8 +89,10 @@
   <a href="{% url "crear_jornada" %}">Nueva Jornada</a>
   {% if not user in usuarios %}<a href="/new_apuesta/{{ jornada.numero }}">Nueva Apuesta</a>{% endif %}
   {% if not premios %}<a href="/new_resultado/{{ jornada.numero }}"/>Poner Resultado</a>{% endif %}
+  <a href="/grafico">Ver gráficos</a>
   {% elif user.is_active %}
   {% if not user in usuarios %}<a href="/new_apuesta/{{ jornada.numero }}">Nueva Apuesta</a>{% endif %}
+  <a href="/grafico">Ver gráficos</a>
   {% endif %}
   <br/>
   {% if jornada_page.has_previous %}

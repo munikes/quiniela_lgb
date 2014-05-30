@@ -1,0 +1,22 @@
+{% if user.is_authenticated %}
+{% load nvd3_tags %}
+<head>
+  {% include_chart_jscss %}
+  {% load_chart data_deuda.charttype data_deuda.chartdata data_deuda.chartcontainer data_deuda.extra %}
+  {% load_chart data_premio.charttype data_premio.chartdata data_premio.chartcontainer data_premio.extra %}
+  {% load_chart data_posicion.charttype data_posicion.chartdata data_posicion.chartcontainer data_posicion.extra %}
+</head>
+<body>
+  <h1>Gráficos:</h1>
+  <h2>Deudas:</h2>
+  {% include_container data_deuda.chartcontainer 400 600 %}
+  <h2>Premios:</h2>
+  {% include_container data_premio.chartcontainer 400 600 %}
+  <h2>Posiciones:</h2>
+  {% include_container data_posicion.chartcontainer 400 600 %}
+  <a href="/main/">Volver</a>
+  <a href="/logout/">Logout</a>
+{% else %}
+  <a href="/">Login</a>
+{% endif %}
+</body>
