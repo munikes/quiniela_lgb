@@ -1,7 +1,12 @@
 # Django settings for quiniela project.
+import os
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+
+PROJECT_ROOT = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), ".."),
+)
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -12,7 +17,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'quiniela',                      # Or path to database file if using sqlite3.
+        'NAME': 'quiniela_2014',                      # Or path to database file if using sqlite3.
         'USER': 'quiniela',                      # Not used with sqlite3.
         'PASSWORD': 'quiniela',                  # Not used with sqlite3.
         'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -79,6 +84,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'djangobower.finders.BowerFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -123,6 +129,8 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'django_nvd3',
+    'djangobower',
     'quiniela.core',
 )
 
@@ -159,3 +167,16 @@ LOGIN_REDIRECT_URL = '/main/'
 LOGIN_URL = '/'
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# Django-bower
+# ------------
+
+# Specifie path to components root (you need to use absolute path)
+BOWER_COMPONENTS_ROOT = os.path.join(PROJECT_ROOT, 'components')
+
+BOWER_PATH = '/usr/local/bin/bower'
+
+BOWER_INSTALLED_APPS = (
+    'd3#3.3.6',
+    'nvd3#1.1.12-beta',
+)
