@@ -34,6 +34,9 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.db.models import Sum
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+import random
+import datetime
+import time
 
 @login_required
 def principal(request, template_name='core/main.html', jornada=None):
@@ -344,6 +347,7 @@ def crear_grafico(request, template_name='core/graficos.html'):
     jugadores_deuda = {}
     jugadores_premio = {}
     jugadores_posicion= {}
+    jornadas = Jornada.objects.all().order_by('numero')
     for user in users:
         #suma_deuda = (Bolsa.objects.filter(usuario=user).aggregate(Sum('premio')) + Bolsa.objects.filter(usuario=user).aggregate(Sum('coste')))
         deuda = Bolsa.objects.filter(usuario=user).aggregate(Sum('coste'))
@@ -351,6 +355,8 @@ def crear_grafico(request, template_name='core/graficos.html'):
         premio = Bolsa.objects.filter(usuario=user).aggregate(Sum('premio'))
         if float(premio.get('premio__sum')) > 0:
             jugadores_premio[user.username] = float(premio.get('premio__sum'))
+        posiciones = Posicion.objects.filter(usuario=user).order_by('jornada')
+        jugadores_posicion[user.username] = posiciones.values_list('posicion', flat=True)
     xdata = jugadores_deuda.keys()
     ydata = jugadores_deuda.values()
     extra_diagrama = {"tooltip": {"y_start": "€ ", "y_end": ""}}
@@ -375,4 +381,37 @@ def crear_grafico(request, template_name='core/graficos.html'):
         'chartcontainer': chartcontainer,
         'extra':{},
     }
-    return render_to_response('core/graficos.html', {"data_deuda":data_deuda, "data_premio":data_premio}, context_instance=RequestContext(request))
+    xdata = jornadas.values_list('numero', flat=True)
+    ydata1 = jugadores_posicion['pardi']
+    ydata2 = jugadores_posicion['quique']
+    ydata3 = jugadores_posicion['tuco']
+    ydata4 = jugadores_posicion['josu']
+    ydata5 = jugadores_posicion['willie']
+    ydata6 = jugadores_posicion['luisito']
+    ydata7 = jugadores_posicion['zorro']
+    ydata8 = jugadores_posicion['puma']
+    extra_diagrama = {"tooltip": {"y_start": "Tu posición es : ", "y_end": " jornada "}}
+    chartdata = {'x': xdata,
+            'name1': 'Pardi', 'y1': ydata1, 'extra1': extra_diagrama,
+            'name2': 'Quique', 'y2': ydata2, 'extra2': extra_diagrama,
+            'name3': 'Tuco', 'y3': ydata3, 'extra3': extra_diagrama,
+            'name4': 'Josu', 'y4': ydata4, 'extra4': extra_diagrama,
+            'name5': 'Willie', 'y5': ydata5, 'extra5': extra_diagrama,
+            'name6': 'Luisito', 'y6': ydata6, 'extra6': extra_diagrama,
+            'name7': 'Zorro', 'y7': ydata7, 'extra7': extra_diagrama,
+            'name8': 'Puma', 'y8': ydata8, 'extra8': extra_diagrama
+        }
+    charttype = "lineChart"
+    chartcontainer = 'posicion_container'
+    data_posicion = {
+        'charttype': charttype,
+        'chartdata': chartdata,
+        'chartcontainer': chartcontainer,
+        'extra': {
+            'x_is_date': False,
+            'x_axis_format': '',
+            'tag_script_js': True,
+            'jquery_on_ready': False,
+        },
+    }
+    return render_to_response('core/graficos.html', {"data_deuda":data_deuda, "data_premio":data_premio,"data_posicion":data_posicion}, context_instance=RequestContext(request))
