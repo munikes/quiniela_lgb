@@ -110,7 +110,7 @@ class Bolsa (models.Model):
     jornada = models.ForeignKey(Jornada)
     premio = models.DecimalField(verbose_name='Premio', max_digits=10,
             decimal_places=2, help_text='Cantidad de euros ganados.')
-    coste = models.DecimalField(verbose_name='Coste apuestas', max_digits=5,
+    coste = models.DecimalField(verbose_name='Coste apuestas', max_digits=10,
             decimal_places=2, help_text='Coste de las apuestas.')
 
     class Meta:
