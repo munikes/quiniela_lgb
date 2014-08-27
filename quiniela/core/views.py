@@ -361,7 +361,7 @@ def crear_grafico(request, template_name='core/graficos.html'):
         jugadores_posicion[user.username] = posiciones.values_list('posicion', flat=True)
     xdata = jugadores_deuda.keys()
     ydata = jugadores_deuda.values()
-    extra_diagrama = {"tooltip": {"y_start": "€ ", "y_end": ""}}
+    extra_diagrama = {"tooltip": {"y_start": "", "y_end": ""}}
     chartdata = {'x': xdata, 'name1': 'costes', 'y1': ydata, 'extra1': extra_diagrama,}
     charttype = "discreteBarChart"
     chartcontainer = 'deuda_container'
@@ -373,7 +373,7 @@ def crear_grafico(request, template_name='core/graficos.html'):
     }
     xdata = jugadores_premio.keys()
     ydata = jugadores_premio.values()
-    extra_diagrama = {"tooltip": {"y_start": "€ ", "y_end": ""}}
+    extra_diagrama = {"tooltip": {"y_start": "", "y_end": ""}}
     chartdata = {'x': xdata, 'y1': ydata, 'extra1': extra_diagrama}
     charttype = "pieChart"
     chartcontainer = 'premio_container'
@@ -392,7 +392,7 @@ def crear_grafico(request, template_name='core/graficos.html'):
     ydata6 = jugadores_posicion['luisito']
     ydata7 = jugadores_posicion['zorro']
     ydata8 = jugadores_posicion['puma']
-    extra_diagrama = {"tooltip": {"y_start": "Tu posición es : ", "y_end": " jornada "}}
+    extra_diagrama = {"tooltip": {"y_start": "Tu posicion es: ", "y_end": " jornada "}}
     chartdata = {'x': xdata,
             'name1': 'Pardi', 'y1': ydata1, 'extra1': extra_diagrama,
             'name2': 'Quique', 'y2': ydata2, 'extra2': extra_diagrama,
@@ -416,4 +416,6 @@ def crear_grafico(request, template_name='core/graficos.html'):
             'jquery_on_ready': False,
         },
     }
-    return render_to_response('core/graficos.html', {"data_deuda":data_deuda, "data_premio":data_premio,"data_posicion":data_posicion}, context_instance=RequestContext(request))
+    return render_to_response('core/graficos.html', {"data_deuda":data_deuda, 
+        "data_premio":data_premio,"data_posicion":data_posicion}, 
+        context_instance=RequestContext(request))
