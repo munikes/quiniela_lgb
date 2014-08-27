@@ -42,17 +42,19 @@ def principal(request, template_name='core/main.html', jornada=None):
     premios = []
     total_premio = 0
     jornada_list = Jornada.objects.all()
-    paginator = Paginator(jornada_list, 1)
-    page = request.GET.get('page')
-    try:
-        jornada_page = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        jornada_page = paginator.page(paginator.num_pages)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        jornada_page = paginator.page(paginator.num_pages)
-    jornada = jornada_page.object_list[0]
+    jornada_page = 0
+    if jornada_list:
+        paginator = Paginator(jornada_list, 1)
+        page = request.GET.get('page')
+        try:
+            jornada_page = paginator.page(page)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            jornada_page = paginator.page(paginator.num_pages)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results.
+            jornada_page = paginator.page(paginator.num_pages)
+        jornada = jornada_page.object_list[0]
     partidos = Partido.objects.filter(jornada=jornada)
     apuestas = Apuesta.objects.filter(jornada=jornada).order_by('id')
     for apuesta in apuestas:
@@ -164,6 +166,9 @@ def principal(request, template_name='core/main.html', jornada=None):
         bolsa = Bolsa.objects.get(usuario=pagador.usuario, jornada=jornada)
         bolsa.coste = 16 - 64 + total_premio.get('premio__sum')
         bolsa.save()
+        # rehago los costes
+        costes_user = Bolsa.objects.filter(usuario=usuario).aggregate(Sum('coste'))
+        entrada['costes_user'] = costes_user.get('coste__sum')
     return render_to_response('core/main.html', {'usuarios':usuarios,
         'jornada':jornada,'respuesta':respuesta, 'partidos':partidos,
         'total_premio':total_premio.get('premio__sum'),'posiciones':posiciones,'premios':premios,
