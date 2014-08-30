@@ -21,7 +21,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from django.forms import (ModelForm, CharField, HiddenInput, MultipleChoiceField,
-                        CheckboxSelectMultiple, ValidationError)
+                        CheckboxSelectMultiple, DecimalField, ValidationError)
 from django.forms.formsets import BaseFormSet
 
 from quiniela.core.models import Partido, Jornada, Resultado, Premio, Pagador
@@ -76,6 +76,8 @@ class BaseResultadosFormSet(BaseFormSet):
 
 
 class PremioForm(ModelForm):
+
+    cantidad = DecimalField(max_digits=10, decimal_places=2, localize=True)
 
     class Meta:
         model = Premio
