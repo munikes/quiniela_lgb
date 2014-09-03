@@ -8,8 +8,9 @@
   {{ resultados_formset.non_form_errors }}
   {% for form, partido in lista %}
   {{ partido.casilla }} {{ partido.local }} - {{ partido.visitante }} 
-    {% for choice in form.signo.field.choices %}
     {% if partido.casilla != 15 %}
+    {% for choice in form.signo.field.choices %}
+    {% if choice.0 == '1' or  choice.0 == 'X' or  choice.0 == '2' %}
     {{ choice.0 }}<input type="checkbox"
                   id="id_form-{{ forloop.parentloop.counter0 }}-signo"
                   name="form-{{ forloop.parentloop.counter0 }}-signo"
@@ -17,16 +18,31 @@
                   checked="checked"
                   {% endif %}
                   value="{{ choice.1 }}"/>
-      {% else %}
-      {{ choice.0 }}<input type="radio"
-                  id="id_form-{{ forloop.parentloop.counter0 }}-signo"
-                  name="form-{{ forloop.parentloop.counter0 }}-signo"
-                  {% if form.signo.data.0 == choice.0 %}
-                  checked="checked"
-                  {% endif %}
-                  value="{{ choice.1 }}"/>
-      {% endif %}
+    {%endif%}
     {% endfor %}
+    {% else %}
+    <select id="id_form-14-signo" name="form-14-signo">
+        {% if form.signo.data.0 %}
+        <option value="{{form.signo.data.0}}" selected>{{form.signo.data.0}}</option>
+        {% endif %}
+        <option value="M-0">M-0</option>
+        <option value="M-1">M-1</option>
+        <option value="M-2">M-2</option>
+        <option value="M-M">M-M</option>
+        <option value="2-0">2-0</option>
+        <option value="2-1">2-1</option>
+        <option value="2-2">2-2</option>
+        <option value="2-M">2-M</option>
+        <option value="1-0">1-0</option>
+        <option value="1-1">1-1</option>
+        <option value="1-2">1-2</option>
+        <option value="1-M">1-M</option>
+        <option value="0-0">0-0</option>
+        <option value="0-1">0-1</option>
+        <option value="0-2">0-2</option>
+        <option value="0-M">0-M</option>
+     </select>
+    {% endif %}
     <br/>
   {% endfor %}
   </p>

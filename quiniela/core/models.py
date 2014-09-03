@@ -29,6 +29,22 @@ OPCIONES = (
         ('1', '1'),
         ('X', 'X'),
         ('2', '2'),
+        ('M-0', 'M-0'),
+        ('M-1', 'M-1'),
+        ('M-2', 'M-2'),
+        ('M-M', 'M-M'),
+        ('2-0', '2-0'),
+        ('2-1', '2-1'),
+        ('2-2', '2-2'),
+        ('2-M', '2-M'),
+        ('1-0', '1-0'),
+        ('1-1', '1-1'),
+        ('1-2', '1-2'),
+        ('1-M', '1-M'),
+        ('0-0', '0-0'),
+        ('0-1', '0-1'),
+        ('0-2', '0-2'),
+        ('0-M', '0-M'),
         )
 EQUIPOS = (
         ('Almeria', 'Almería'),
@@ -104,7 +120,6 @@ class Partido (models.Model):
 
     class Meta:
         unique_together = (('local', 'visitante'),)
-
 
 class Bolsa (models.Model):
     usuario = models.ForeignKey(User)
