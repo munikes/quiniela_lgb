@@ -7,9 +7,30 @@
   <p align="justify">
   {% for partido in partidos  %}
   {{ partido.casilla }} {{ partido.local }} - {{ partido.visitante }}
-  1<input type="radio" name="signo-{{ partido.casilla }}" value="1" {% if partido.signo|stringformat:'s' == '1' %}checked{% endif %}/>
-  X<input type="radio" name="signo-{{ partido.casilla }}" value="X" {% if partido.signo|stringformat:'s' == 'X' %}checked{% endif %}/>
-  2<input type="radio" name="signo-{{ partido.casilla }}" value="2" {% if partido.signo|stringformat:'s' == '2' %}checked{% endif %}/><br/>
+    {% if partido.casilla != 15 %}
+    1<input type="radio" name="signo-{{ partido.casilla }}" value="1" {% if partido.signo|stringformat:'s' == '1' %}checked{% endif %}/>
+    X<input type="radio" name="signo-{{ partido.casilla }}" value="X" {% if partido.signo|stringformat:'s' == 'X' %}checked{% endif %}/>
+    2<input type="radio" name="signo-{{ partido.casilla }}" value="2" {% if partido.signo|stringformat:'s' == '2' %}checked{% endif %}/><br/>
+    {% else %}
+    <select name="signo-{{ partido.casilla }}">
+        <option value="M-0" {% if partido.signo|stringformat:'s' == 'M-0' %}selected{% endif %}>M-0</option>
+        <option value="M-1" {% if partido.signo|stringformat:'s' == 'M-1' %}selected{% endif %}>M-1</option>
+        <option value="M-2" {% if partido.signo|stringformat:'s' == 'M-2' %}selected{% endif %}>M-2</option>
+        <option value="M-M" {% if partido.signo|stringformat:'s' == 'M-M' %}selected{% endif %}>M-M</option>
+        <option value="2-0" {% if partido.signo|stringformat:'s' == '2-0' %}selected{% endif %}>2-0</option>
+        <option value="2-1" {% if partido.signo|stringformat:'s' == '2-1' %}selected{% endif %}>2-1</option>
+        <option value="2-2" {% if partido.signo|stringformat:'s' == '2-2' %}selected{% endif %}>2-2</option>
+        <option value="2-M" {% if partido.signo|stringformat:'s' == '2-M' %}selected{% endif %}>2-M</option>
+        <option value="1-0" {% if partido.signo|stringformat:'s' == '1-0' %}selected{% endif %}>1-0</option>
+        <option value="1-1" {% if partido.signo|stringformat:'s' == '1-1' %}selected{% endif %}>1-1</option>
+        <option value="1-2" {% if partido.signo|stringformat:'s' == '1-2' %}selected{% endif %}>1-2</option>
+        <option value="1-M" {% if partido.signo|stringformat:'s' == '1-M' %}selected{% endif %}>1-M</option>
+        <option value="0-0" {% if partido.signo|stringformat:'s' == '0-0' %}selected{% endif %}>0-0</option>
+        <option value="0-1" {% if partido.signo|stringformat:'s' == '0-1' %}selected{% endif %}>0-1</option>
+        <option value="0-2" {% if partido.signo|stringformat:'s' == '0-2' %}selected{% endif %}>0-2</option>
+        <option value="0-M" {% if partido.signo|stringformat:'s' == '0-M' %}selected{% endif %}>0-M</option>
+    </select>
+    {% endif %}
   {% endfor %}
   </p>
   <p>Premios:</p>

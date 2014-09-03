@@ -107,7 +107,7 @@ class Apuesta (models.Model):
 
 class Partido (models.Model):
     jornada = models.ForeignKey(Jornada)
-    signo = models.CharField(max_length=1, choices=OPCIONES,
+    signo = models.CharField(max_length=3, choices=OPCIONES,
             verbose_name = 'Resultado', default='')
     local = models.CharField(max_length=20, verbose_name='Local',
             choices=EQUIPOS)

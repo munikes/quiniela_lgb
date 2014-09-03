@@ -22,25 +22,22 @@
     {% endfor %}
     {% else %}
     <select id="id_form-14-signo" name="form-14-signo">
-        {% if form.signo.data.0 %}
-        <option value="{{form.signo.data.0}}" selected>{{form.signo.data.0}}</option>
-        {% endif %}
-        <option value="M-0">M-0</option>
-        <option value="M-1">M-1</option>
-        <option value="M-2">M-2</option>
-        <option value="M-M">M-M</option>
-        <option value="2-0">2-0</option>
-        <option value="2-1">2-1</option>
-        <option value="2-2">2-2</option>
-        <option value="2-M">2-M</option>
-        <option value="1-0">1-0</option>
-        <option value="1-1">1-1</option>
-        <option value="1-2">1-2</option>
-        <option value="1-M">1-M</option>
-        <option value="0-0">0-0</option>
-        <option value="0-1">0-1</option>
-        <option value="0-2">0-2</option>
-        <option value="0-M">0-M</option>
+        <option value="M-0" {% if form.signo.data.0|stringformat:'s' == 'M-0' %}selected{% endif %}>M-0</option>
+        <option value="M-1" {% if form.signo.data.0|stringformat:'s' == 'M-1' %}selected{% endif %}>M-1</option>
+        <option value="M-2" {% if form.signo.data.0|stringformat:'s' == 'M-2' %}selected{% endif %}>M-2</option>
+        <option value="M-M" {% if form.signo.data.0|stringformat:'s' == 'M-M' %}selected{% endif %}>M-M</option>
+        <option value="2-0" {% if form.signo.data.0|stringformat:'s' == '2-0' %}selected{% endif %}>2-0</option>
+        <option value="2-1" {% if form.signo.data.0|stringformat:'s' == '2-1' %}selected{% endif %}>2-1</option>
+        <option value="2-2" {% if form.signo.data.0|stringformat:'s' == '2-2' %}selected{% endif %}>2-2</option>
+        <option value="2-M" {% if form.signo.data.0|stringformat:'s' == '2-M' %}selected{% endif %}>2-M</option>
+        <option value="1-0" {% if form.signo.data.0|stringformat:'s' == '1-0' %}selected{% endif %}>1-0</option>
+        <option value="1-1" {% if form.signo.data.0|stringformat:'s' == '1-1' %}selected{% endif %}>1-1</option>
+        <option value="1-2" {% if form.signo.data.0|stringformat:'s' == '1-2' %}selected{% endif %}>1-2</option>
+        <option value="1-M" {% if form.signo.data.0|stringformat:'s' == '1-M' %}selected{% endif %}>1-M</option>
+        <option value="0-0" {% if form.signo.data.0|stringformat:'s' == '0-0' %}selected{% endif %}>0-0</option>
+        <option value="0-1" {% if form.signo.data.0|stringformat:'s' == '0-1' %}selected{% endif %}>0-1</option>
+        <option value="0-2" {% if form.signo.data.0|stringformat:'s' == '0-2' %}selected{% endif %}>0-2</option>
+        <option value="0-M" {% if form.signo.data.0|stringformat:'s' == '0-M' %}selected{% endif %}>0-M</option>
      </select>
     {% endif %}
     <br/>
