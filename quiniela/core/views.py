@@ -41,7 +41,7 @@ def principal(request, template_name='core/main.html', jornada=None):
     respuesta = []
     premios = []
     total_premio = 0
-    jornada_list = Jornada.objects.all()
+    jornada_list = Jornada.objects.exclude(numero=0)
     jornada_page = 0
     if jornada_list:
         paginator = Paginator(jornada_list, 1)
