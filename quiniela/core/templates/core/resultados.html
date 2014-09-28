@@ -13,6 +13,7 @@
     2<input type="radio" name="signo-{{ partido.casilla }}" value="2" {% if partido.signo|stringformat:'s' == '2' %}checked{% endif %}/><br/>
     {% else %}
     <select name="signo-{{ partido.casilla }}">
+        <option value="" {% if partido.signo|stringformat:'s' == '' %}selected{% endif %}>--</option>
         <option value="M-0" {% if partido.signo|stringformat:'s' == 'M-0' %}selected{% endif %}>M-0</option>
         <option value="M-1" {% if partido.signo|stringformat:'s' == 'M-1' %}selected{% endif %}>M-1</option>
         <option value="M-2" {% if partido.signo|stringformat:'s' == 'M-2' %}selected{% endif %}>M-2</option>
