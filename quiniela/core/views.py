@@ -416,6 +416,18 @@ def crear_grafico(request, template_name='core/graficos.html'):
             'jquery_on_ready': False,
         },
     }
+    xdata = ['deuda', 'premios']
+    ydata = [len(jornadas)*(len(users)*8), sum(jugadores_deuda.values())]
+    extra_diagrama = {"tooltip": {"y_start": "", "y_end": ""}}
+    chartdata = {'x': xdata, 'y1': ydata, 'extra1': extra_diagrama}
+    charttype = "pieChart"
+    chartcontainer = 'ganancias_container'
+    data_ganancias = {
+         'charttype': charttype,
+         'chartdata': chartdata,
+         'chartcontainer': chartcontainer,
+         'extra':{},
+    }
     return render_to_response('core/graficos.html', {"data_deuda":data_deuda, 
-        "data_premio":data_premio,"data_posicion":data_posicion}, 
+        "data_premio":data_premio,"data_posicion":data_posicion,"data_ganancias":data_ganancias}, 
         context_instance=RequestContext(request))
