@@ -93,7 +93,7 @@ class BaseResultadosFormSet(BaseFormSet):
 
 class PremioForm(ModelForm):
 
-    cantidad = DecimalField(max_digits=10, decimal_places=2, localize=True)
+    cantidad = DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
         model = Premio
