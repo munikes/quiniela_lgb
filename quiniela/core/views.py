@@ -69,7 +69,8 @@ def principal(request, template_name='core/main.html', jornada=None):
         cont_pleno = 0
         apuestas = Apuesta.objects.filter(jornada=jornada, usuario=usuario)
         for apuesta in apuestas:
-            resultados = Resultado.objects.filter(apuesta=apuesta).values('signo')
+            resultados = Resultado.objects.filter(apuesta=apuesta).values('signo').order_by('id')
+            print resultados
             matriz_resultados.append(resultados)
             if partidos.values('signo'):
                 aciertos = obtener_aciertos(resultados, partidos.values('signo'))
@@ -78,6 +79,7 @@ def principal(request, template_name='core/main.html', jornada=None):
         if partidos.values('signo'):
             # calcular aciertos dobles y pleno
             apuesta =  crear_lista_apuestas(matriz_resultados)
+            print apuesta
             cont = 0
             for signo in apuesta:
                 for i in signo:
