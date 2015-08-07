@@ -6,6 +6,7 @@
   {% load_chart data_premio.charttype data_premio.chartdata data_premio.chartcontainer data_premio.extra %}
   {% load_chart data_ganancias.charttype data_ganancias.chartdata data_ganancias.chartcontainer data_ganancias.extra %}
   {% load_chart data_posicion.charttype data_posicion.chartdata data_posicion.chartcontainer data_posicion.extra %}
+  {% load_chart data_chipleader.charttype data_chipleader.chartdata data_chipleader.chartcontainer  data_chipleader.extra %}
 </head>
 <body>
   <h1>Gráficos:</h1>
@@ -17,6 +18,8 @@
   {% include_container data_ganancias.chartcontainer 400 600 %}
   <h2>Posiciones:</h2>
   {% include_container data_posicion.chartcontainer 400 1000 %}
+  <h2>Cuantas veces he sido...:</h2>
+  {% include_container data_chipleader.chartcontainer 400 1000 %}
   <a href="/main/">Volver</a>
   <a href="/logout/">Salir</a>
 {% else %}

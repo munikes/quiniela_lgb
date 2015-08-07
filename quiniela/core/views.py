@@ -345,11 +345,14 @@ def obtener_aciertos(apuesta, resultado):
 
 @login_required
 def crear_grafico(request, template_name='core/graficos.html'):
+    # consultas para gráficos
     users = User.objects.all()
     jugadores_deuda = {}
     jugadores_premio = {}
     jugadores_posicion= {}
+    conjunto_posiciones = {}
     jornadas = Jornada.objects.all().order_by('numero')
+    list_aux = []
     for user in users:
         #suma_deuda = (Bolsa.objects.filter(usuario=user).aggregate(Sum('premio')) + Bolsa.objects.filter(usuario=user).aggregate(Sum('coste')))
         deuda = Bolsa.objects.filter(usuario=user).aggregate(Sum('coste'))
@@ -359,6 +362,11 @@ def crear_grafico(request, template_name='core/graficos.html'):
             jugadores_premio[user.username] = float(premio.get('premio__sum'))
         posiciones = Posicion.objects.filter(usuario=user).order_by('jornada')
         jugadores_posicion[user.username] = posiciones.values_list('posicion', flat=True)
+        for i in range(len(users)):
+            list_aux.append(posiciones.filter(posicion=i+1).count())
+        conjunto_posiciones[user.username] = list_aux
+        list_aux = []
+    # Gráfico deuda
     xdata = jugadores_deuda.keys()
     ydata = jugadores_deuda.values()
     extra_diagrama = {"tooltip": {"y_start": "", "y_end": ""}}
@@ -369,8 +377,11 @@ def crear_grafico(request, template_name='core/graficos.html'):
         'charttype': charttype,
         'chartdata': chartdata,
         'chartcontainer': chartcontainer,
-        'extra':{},
+        'extra':{
+            'y_axis_format': '',
+        },
     }
+    # Gráfico premios
     xdata = jugadores_premio.keys()
     ydata = jugadores_premio.values()
     extra_diagrama = {"tooltip": {"y_start": "", "y_end": ""}}
@@ -383,6 +394,7 @@ def crear_grafico(request, template_name='core/graficos.html'):
         'chartcontainer': chartcontainer,
         'extra':{},
     }
+    # Gráfico posiciones
     xdata = jornadas.values_list('numero', flat=True)
     ydata1 = jugadores_posicion['pardi']
     ydata2 = jugadores_posicion['quique']
@@ -416,6 +428,7 @@ def crear_grafico(request, template_name='core/graficos.html'):
             'jquery_on_ready': False,
         },
     }
+    # Gráfico ganancias
     xdata = ['deuda', 'premios']
     ydata = [len(jornadas)*(len(users)*8), sum(jugadores_deuda.values())]
     extra_diagrama = {"tooltip": {"y_start": "", "y_end": ""}}
@@ -428,6 +441,46 @@ def crear_grafico(request, template_name='core/graficos.html'):
          'chartcontainer': chartcontainer,
          'extra':{},
     }
-    return render_to_response('core/graficos.html', {"data_deuda":data_deuda, 
-        "data_premio":data_premio,"data_posicion":data_posicion,"data_ganancias":data_ganancias}, 
+    # Gráfico chip leader
+    xdata = range(1, len(users)+1)
+    ydata = conjunto_posiciones['pardi']
+    ydata2 = conjunto_posiciones['josu']
+    ydata3 = conjunto_posiciones['willie']
+    ydata4 = conjunto_posiciones['zorro']
+    ydata5 = conjunto_posiciones['luisito']
+    ydata6 = conjunto_posiciones['tuco']
+    ydata7 = conjunto_posiciones['puma']
+    ydata8 = conjunto_posiciones['quique']
+
+    extra_serie = {"tooltip": {"y_start": "There are ", "y_end": " calls"}}
+
+    chartdata = {
+        'x': xdata,
+        'name1': 'Pardi', 'y1': ydata, 'extra1': extra_serie,
+        'name2': 'Josu', 'y2': ydata2, 'extra2': extra_serie,
+        'name3': 'Willie', 'y3': ydata3, 'extra3': extra_serie,
+        'name4': 'Zorro', 'y4': ydata4, 'extra4': extra_serie,
+        'name5': 'Luisito', 'y5': ydata5, 'extra5': extra_serie,
+        'name6': 'Tuco', 'y6': ydata6, 'extra6': extra_serie,
+        'name7': 'Puma', 'y7': ydata7, 'extra7': extra_serie,
+        'name8': 'Quique', 'y8': ydata8, 'extra8': extra_serie
+    }
+
+    charttype = "multiBarChart"
+    chartcontainer = 'chipleader_container'
+    data_chipleader = {
+        'charttype': charttype,
+        'chartdata': chartdata,
+        'chartcontainer': chartcontainer,
+        'extra':{
+            'x_is_date': False,
+            'x_axis_format': '',
+            'tag_script_js': True,
+            'jquery_on_ready': False,
+            },
+    }
+    return render_to_response('core/graficos.html', {"data_deuda":data_deuda,
+                "data_premio":data_premio,"data_posicion":data_posicion,
+                "data_ganancias":data_ganancias,
+                "data_chipleader":data_chipleader},
         context_instance=RequestContext(request))
