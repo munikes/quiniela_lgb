@@ -452,7 +452,7 @@ def crear_grafico(request, template_name='core/graficos.html'):
     ydata7 = conjunto_posiciones['puma']
     ydata8 = conjunto_posiciones['quique']
 
-    extra_serie = {"tooltip": {"y_start": "There are ", "y_end": " calls"}}
+    extra_serie = {"tooltip": {"y_start": "Has sido ", "y_end": " veces "}}
 
     chartdata = {
         'x': xdata,
