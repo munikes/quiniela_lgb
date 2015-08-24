@@ -395,7 +395,8 @@ def crear_grafico(request, template_name='core/graficos.html'):
         'extra':{},
     }
     # Gráfico posiciones
-    xdata = jornadas.values_list('numero', flat=True)
+    xdata = range(0, len(jornadas)) # número de paginas
+    # xdata = len(jornadas.values_list('numero', flat=True)) # número de jornadas
     ydata1 = jugadores_posicion['pardi']
     ydata2 = jugadores_posicion['quique']
     ydata3 = jugadores_posicion['tuco']
