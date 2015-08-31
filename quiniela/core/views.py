@@ -35,6 +35,8 @@ from django.shortcuts import redirect
 from django.db.models import Sum
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+COSTE_APUESTA = 0.75
+
 @login_required
 def principal(request, template_name='core/main.html', jornada=None):
     usuarios = []
@@ -114,15 +116,15 @@ def principal(request, template_name='core/main.html', jornada=None):
                 bolsa.premio = premio
                 bolsa.usuario = usuario
                 if posicion_anterior == 0:
-                    bolsa.coste = 8
+                    bolsa.coste = COSTE_APUESTA * 16
                     posicion_anterior = 0
                 elif posicion_anterior > len(usuarios)/2:
-                    bolsa.coste = 16
+                    bolsa.coste = (COSTE_APUESTA * 16) * 2
                 elif (posicion_anterior <= len(usuarios)/2 
                         and posicion_anterior != 0):
                     bolsa.coste = 0
                 if pagador.usuario == bolsa.usuario:
-                    bolsa.coste = bolsa.coste - 64
+                    bolsa.coste = bolsa.coste - ((COSTE_APUESTA * 16) * 8)
                 bolsa.jornada = jornada
                 bolsa.save()
             else:
@@ -164,7 +166,7 @@ def principal(request, template_name='core/main.html', jornada=None):
     total_premio = Bolsa.objects.filter(jornada=jornada).aggregate(Sum('premio'))
     if total_premio.get('premio__sum'):
         bolsa = Bolsa.objects.get(usuario=pagador.usuario, jornada=jornada)
-        bolsa.coste = 16 - 64 + total_premio.get('premio__sum')
+        bolsa.coste = ((COSTE_APUESTA * 16) * 2) - ((COSTE_APUESTA * 16) * 8) + total_premio.get('premio__sum')
         bolsa.save()
         # rehago los costes
         costes_user = Bolsa.objects.filter(usuario=usuario).aggregate(Sum('coste'))
