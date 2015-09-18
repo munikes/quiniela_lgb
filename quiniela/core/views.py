@@ -34,8 +34,9 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.db.models import Sum
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from decimal import Decimal
 
-COSTE_APUESTA = 0.75
+COSTE_APUESTA = Decimal(0.5)
 
 @login_required
 def principal(request, template_name='core/main.html', jornada=None):
@@ -120,7 +121,7 @@ def principal(request, template_name='core/main.html', jornada=None):
                     posicion_anterior = 0
                 elif posicion_anterior > len(usuarios)/2:
                     bolsa.coste = (COSTE_APUESTA * 16) * 2
-                elif (posicion_anterior <= len(usuarios)/2 
+                elif (posicion_anterior <= len(usuarios)/2
                         and posicion_anterior != 0):
                     bolsa.coste = 0
                 if pagador.usuario == bolsa.usuario:
