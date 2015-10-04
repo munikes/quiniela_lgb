@@ -83,7 +83,7 @@ EQUIPOS = (
         ('Mirandes', 'Mirandés'),
         ('Numancia', 'Numancia'),
         ('Osasuna', 'Osasuna'),
-        ('Oviedo', 'Oviedo'),
+        ('R. Oviedo', 'R. Oviedo'),
         ('Ponferradina', 'Ponferradina'),
         ('Tenerife', 'Tenerife'),
         ('Valladolid', 'Valladolid'),
