@@ -36,6 +36,8 @@ from django.db.models import Sum
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from decimal import Decimal
 
+import telegram
+
 COSTE_APUESTA = Decimal(0.5)
 
 @login_required
@@ -157,7 +159,8 @@ def principal(request, template_name='core/main.html', jornada=None):
     # inserto posiciones
     if (not Partido.objects.filter(jornada=jornada, signo__exact='')
             and not Posicion.objects.filter(jornada=jornada)):
-        insertar_posiciones(respuesta, jornada)
+        texto_posiciones = insertar_posiciones(respuesta, jornada)
+        mandar_posiciones_bot(texto_posiciones)
     posiciones = Posicion.objects.filter(jornada=jornada)
     for entrada in respuesta:
         for posicion in posiciones:
@@ -324,6 +327,7 @@ def insertar_posiciones(lista, jornada):
     anterior. La entrada es una lista que contiene los usuarios, sus
     aciertos, sus dobles, si tiene el pleno y sus posiciones anteriores.
     '''
+    texto = 'Posiciones:\n'
     lista = sorted(lista, key=lambda entrada: (entrada.get('numero_aciertos'),
         entrada.get('pleno'),
         entrada.get('dobles_aciertos'),
@@ -335,6 +339,11 @@ def insertar_posiciones(lista, jornada):
         posicion.jornada = jornada
         posicion.posicion = position + 1
         posicion.save()
+        if posicion.posicion == 8:
+            texto +=  u'\U0001F4A9. ' + posicion.usuario.username + '\n'
+        else:
+            texto += str(posicion.posicion) + '. ' + posicion.usuario.username + '\n'
+    return texto
 
 def obtener_aciertos(apuesta, resultado):
     aciertos = 0
@@ -488,3 +497,8 @@ def crear_grafico(request, template_name='core/graficos.html'):
                 "data_ganancias":data_ganancias,
                 "data_chipleader":data_chipleader},
         context_instance=RequestContext(request))
+
+def mandar_posiciones_bot(text):
+    bot = telegram.Bot(token='169651993:AAGnC3ZV_fZBLFYHgtprgQp4xlGKB7SCq00')
+    chat_id = bot.getUpdates()[-1].message.chat_id
+    bot.sendMessage(chat_id=chat_id, text=text)
