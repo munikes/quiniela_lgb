@@ -500,5 +500,4 @@ def crear_grafico(request, template_name='core/graficos.html'):
 
 def mandar_posiciones_bot(text):
     bot = telegram.Bot(token='169651993:AAGnC3ZV_fZBLFYHgtprgQp4xlGKB7SCq00')
-    chat_id = bot.getUpdates()[-1].message.chat_id
-    bot.sendMessage(chat_id=chat_id, text=text)
+    bot.sendMessage(chat_id=-5014890, text=text)
