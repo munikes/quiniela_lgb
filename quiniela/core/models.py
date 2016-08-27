@@ -89,10 +89,15 @@ EQUIPOS = (
         ('Valladolid', 'Valladolid'),
         ('Zaragoza', 'Zaragoza'),
         )
+class Temporada (models.Model)
+    temporada = models.CharField(max_length=9, verbose_name='Temporada', choices=TEMPORADA)
+
+
 class Jornada (models.Model):
     numero = models.PositiveSmallIntegerField(primary_key=True,
             help_text='Jornada de liga.', verbose_name = 'Número')
     anterior = models.ForeignKey('self', blank=True, null=True)
+    temporada = models.ForeignKey(Temporada)
 
 
 class Apuesta (models.Model):
