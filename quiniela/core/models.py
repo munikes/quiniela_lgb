@@ -89,8 +89,15 @@ EQUIPOS = (
         ('Valladolid', 'Valladolid'),
         ('Zaragoza', 'Zaragoza'),
         )
-class Temporada (models.Model)
-    temporada = models.CharField(max_length=9, verbose_name='Temporada', choices=TEMPORADA)
+TEMPORADA = (
+        ('2013-2014', '2013-2014'),
+        ('2014-2015', '2014-2015'),
+        ('2015-2016', '2015-2016'),
+        ('2016-2017', '2016-2017'),
+        )
+class Temporada (models.Model):
+    temporada = models.CharField(max_length=9, verbose_name='Temporada', 
+            choices=TEMPORADA)
 
 
 class Jornada (models.Model):
