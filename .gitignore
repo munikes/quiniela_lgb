@@ -5,3 +5,5 @@
 # Backup
 *json
 *sql
+# Environment
+env/
