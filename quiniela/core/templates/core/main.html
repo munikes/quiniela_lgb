@@ -1,4 +1,9 @@
-{% if user.is_authenticated %}
+{% extends "base.html" %}
+
+{% load bootstrap3 %}
+
+{% block content %}
+<div class="container">
 <h1>Jornada: {{ jornada.numero }}</h1>
 {% if user in usuarios %}
 <table border='1'>
@@ -85,25 +90,34 @@
   </tr>
 </table>
 {% endif %}
-  {% if user.is_superuser %}
-  <a href="{% url "crear_jornada" %}">Nueva Jornada</a>
-  {% if not user in usuarios %}<a href="/new_apuesta/{{ jornada.numero }}">Nueva Apuesta</a>{% endif %}
-  {% if not premios %}<a href="/new_resultado/{{ jornada.numero }}"/>Poner Resultado</a>{% endif %}
-  <a href="{% url "crear_grafico" %}">Ver gráficos</a>
-  {% elif user.is_active %}
-  {% if not user in usuarios %}<a href="/new_apuesta/{{ jornada.numero }}">Nueva Apuesta</a>{% endif %}
-  <a href="{% url "crear_grafico" %}">Ver gráficos</a>
-  {% endif %}
-  <br/>
-  {% if jornada_page.has_previous %}
-    <a href="?page={{ jornada_page.previous_page_number }}">Anterior</a>
-  {% endif %}
-    Jornada {{ jornada_page.number }} de {{ jornada_page.paginator.num_pages }}.
-  {% if jornada_page.has_next %}
-    <a href="?page={{ jornada_page.next_page_number }}">Siguiente</a>
-  {% endif %}
-  <br/>
-  <a href="/logout/">Salir</a>
-{% else %}
-<a href="/">Entrar</a>
+{% with jornada.numero|stringformat:"s" as jornada_numero %}
+{% if user.is_superuser %}
+  {% bootstrap_button button_type=link href="/new_jornada/" content="Nueva Jornada" button_class="btn btn-primary" %}
+  {% if not user in usuarios %}{% bootstrap_button button_type=link href="/new_apuesta/"|add:jornada_numero content="Nueva Apuesta" button_class="btn btn-primary" %}{% endif %}
+  {% if not premios %}{% bootstrap_button button_type=link href="/new_resultado/"|add:jornada_numero content="Poner Resultado" button_class="btn btn-primary" %}{% endif %}
+  {% bootstrap_button button_type=link href="/grafico/" content="Ver gráficos" button_class="btn btn-primary" %}
+{% elif user.is_active %}
+  {% if not user in usuarios %}{% bootstrap_button button_type=link href="/new_apuesta/"|add:jornada_numero content="Nueva Apuesta" button_class="btn btn-primary" %}{% endif %}
+  {% bootstrap_button button_type=link href="/grafico/" content="Ver gráficos" button_class="btn btn-primary" %}
 {% endif %}
+{% endwith %}
+<br/>
+<nav>
+  <ul class="pager">
+{% if jornada_page.has_previous and jornada_page.has_next %}
+    <li class="previous"><a href="?page={{ jornada_page.previous_page_number }}"><span aria-hidden="true">&larr;</span> Anterior</a></li>
+    <li class="next"><a href="?page={{ jornada_page.next_page_number }}">Siguiente <span aria-hidden="true">&rarr;</span></a></li>
+{% elif jornada_page.has_previous %}
+    <li class="previous"><a href="?page={{ jornada_page.previous_page_number }}"><span aria-hidden="true">&larr;</span> Anterior</a></li>
+    <li class="next disabled"><a href="#">Siguiente <span aria-hidden="true">&rarr;</span></a></li>
+{% elif jornada_page.has_next %}
+    <li class="previous disabled"><a href="#"><span aria-hidden="true">&larr;</span> Anterior</a></li>
+    <li class="next"><a href="?page={{ jornada_page.next_page_number }}">Siguiente <span aria-hidden="true">&rarr;</span></a></li>
+{% endif %}
+<!--Página {{ jornada_page.number }} de {{ jornada_page.paginator.num_pages }}.-->
+  </ul>
+</nav>
+<br/>
+{% bootstrap_button button_type=link href="/logout/" content="Salir" button_class="btn btn-primary" %}
+</div>
+{% endblock %}
