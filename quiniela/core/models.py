@@ -95,6 +95,7 @@ TEMPORADA = (
         ('2015-2016', '2015-2016'),
         ('2016-2017', '2016-2017'),
         )
+
 class Temporada (models.Model):
     temporada = models.CharField(max_length=9, verbose_name='Temporada', 
             choices=TEMPORADA)
@@ -108,16 +109,18 @@ class Jornada (models.Model):
 
 
 class Apuesta (models.Model):
+    temporada = models.ForeignKey(Temporada)
     jornada = models.ForeignKey(Jornada)
     usuario = models.ForeignKey(User)
     numero = models.PositiveSmallIntegerField(help_text='Número de apuesta.',
             verbose_name = 'Número')
 
     class Meta:
-        unique_together = (('jornada', 'usuario', 'numero'),)
+        unique_together = (('temporada', 'jornada', 'usuario', 'numero'),)
 
 
 class Partido (models.Model):
+    temporada = models.ForeignKey(Temporada)
     jornada = models.ForeignKey(Jornada)
     signo = models.CharField(max_length=3, choices=OPCIONES,
             verbose_name = 'Resultado', default='')
@@ -131,10 +134,12 @@ class Partido (models.Model):
         ], help_text='La casilla del partido.', blank=True)
 
     class Meta:
-        unique_together = (('local', 'visitante'),)
+        unique_together = (('temporada', 'local', 'visitante'),)
+
 
 class Bolsa (models.Model):
     usuario = models.ForeignKey(User)
+    temporada = models.ForeignKey(Temporada)
     jornada = models.ForeignKey(Jornada)
     premio = models.DecimalField(verbose_name='Premio', max_digits=10,
             decimal_places=2, help_text='Cantidad de euros ganados.')
@@ -142,27 +147,29 @@ class Bolsa (models.Model):
             decimal_places=2, help_text='Coste de las apuestas.')
 
     class Meta:
-        unique_together = (('jornada', 'usuario'),)
+        unique_together = (('temporada', 'jornada', 'usuario'),)
 
 
 class Posicion (models.Model):
     usuario = models.ForeignKey(User)
+    temporada = models.ForeignKey(Temporada)
     jornada = models.ForeignKey(Jornada)
     posicion = models.PositiveSmallIntegerField(verbose_name='Posicion',
             help_text='Posición que ocupas.')
 
     class Meta:
-        unique_together = (('posicion', 'jornada', 'usuario'),)
+        unique_together = (('temporada', 'posicion', 'jornada', 'usuario'),)
 
 
 class Resultado (models.Model):
     signo = models.CharField(max_length=18,
             verbose_name = 'Resultado')
     apuesta = models.ForeignKey(Apuesta)
+    temporada = models.ForeignKey(Temporada)
     partido = models.ForeignKey(Partido)
 
     class Meta:
-        unique_together = (('apuesta', 'partido'),)
+        unique_together = (('temporada', 'apuesta', 'partido'),)
 
 
 class Premio (models.Model):
@@ -174,6 +181,7 @@ class Premio (models.Model):
             (11, '4ª categoría (11)'),
             (10, '5ª categoría (10)'),
             )
+    temporada = models.ForeignKey(Temporada)
     jornada = models.ForeignKey(Jornada)
     categoria = models.PositiveSmallIntegerField(verbose_name='categoria',
             choices=OPCIONES, default='')
@@ -181,12 +189,13 @@ class Premio (models.Model):
             decimal_places=2)
 
     class Meta:
-        unique_together = (('jornada', 'categoria'),)
+        unique_together = (('temporada', 'jornada', 'categoria'),)
 
 
 class Pagador (models.Model):
     usuario = models.ForeignKey(User)
+    temporada = models.ForeignKey(Temporada)
     jornada = models.ForeignKey(Jornada)
 
     class Meta:
-        unique_together = (('usuario', 'jornada'),)
+        unique_together = (('usuario', 'temporada', 'jornada'),)
