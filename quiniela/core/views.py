@@ -443,7 +443,7 @@ def crear_grafico(request, template_name='core/graficos.html'):
     }
     # Gráfico ganancias
     xdata = ['deuda', 'premios']
-    ydata = [len(jornadas)*(len(users)*8), sum(jugadores_deuda.values())]
+    ydata = [float(len(jornadas)*(len(users)*(COSTE_APUESTA*16))), sum(jugadores_deuda.values())]
     extra_diagrama = {"tooltip": {"y_start": "", "y_end": ""}}
     chartdata = {'x': xdata, 'y1': ydata, 'extra1': extra_diagrama}
     charttype = "pieChart"
